@@ -1,0 +1,27 @@
+<?php
+
+/**
+ * @file
+ *
+ * Installs the required object for  the image segmentation solution pack
+ */
+
+/**
+ * Implements hook_install().
+ *
+ * @see islandora_islandora_required_objects()
+ */
+function image_segmentation_install()
+{
+    module_load_include('inc', 'islandora', 'includes/solution_packs');
+    islandora_install_solution_pack('image_segmentation');
+}
+
+/**
+ * Implementation of hook_uninstall.
+ */
+function image_segmentation_uninstall()
+{
+    module_load_include('inc', 'islandora', 'includes/solution_packs');
+    islandora_install_solution_pack('image_segmentation', 'uninstall');
+}
