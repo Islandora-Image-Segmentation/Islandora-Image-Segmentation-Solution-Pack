@@ -1,4 +1,9 @@
-<link rel="stylesheet" href="sidebar.css" />
+**
+* @file
+* This is the template file for the corpus sidebar.
+*/
+
+drupal_add_css("$path/css/sidebar.css");
 <div id="sidebar_container">
   <div id="sidebar_container_inner">
 
@@ -29,5 +34,5 @@
         <button>View Similar Segments</button>
       </div>
     </div>
-  </div
+  </div>
 </div>
