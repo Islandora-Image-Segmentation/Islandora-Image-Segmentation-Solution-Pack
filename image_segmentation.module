@@ -27,6 +27,30 @@ function image_segmentation_menu()
 }
 
 /**
+ * Implements hook_theme().
+ */
+function image_segmentation_theme($existing, $type, $theme, $path)
+{
+    return array(
+        'image_segmentation_segment' => array(
+            'file' => 'theme/theme.inc',
+            'template' => 'theme/image-segmentation-segment',
+            'pattern' => 'image_segmentation_sidebar__',
+            'variables' => array('object' => NULL),
+        )
+    );
+}
+
+/**
+ * Implements hook_islandora_view_object().
+ */
+function image_segmentation_islandora_segmentedImageCModel_islandora_view_object(AbstractObject $object, $user, $page_number)
+{
+    $output = theme('image_segmentation_segment', array('object' => $object));
+    return array('' => $output);
+}
+
+/**
  * Implements hook_islandora_required_objects().
  */
 function image_segmentation_islandora_required_objects(IslandoraTuque $connection)
