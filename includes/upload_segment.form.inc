@@ -20,6 +20,13 @@ function image_segmentation_upload_segment_form(array $form, array &$form_state)
     $upload_size = min((int) ini_get('post_max_size'), (int) ini_get('upload_max_filesize'));
     $extensions = array('tiff tif jp2 jpg jpeg');
     $form = array();
+    $form['title'] = array(
+        '#title' => t('Title'),
+        '#type' => 'textfield',
+        '#required' => FALSE,
+        '#descritpion' => t('Title of the segment'),
+        '#default_value' => isset($form_state['values']['title']) ? $form_state['values']['title'] : 'New Object',
+    );
     $form['file'] = array(
         '#title' => t('Segmented image file'),
         '#type' => 'managed_file',
@@ -54,6 +61,7 @@ function image_segmentation_upload_segment_form(array $form, array &$form_state)
 function image_segmentation_upload_segment_form_submit(array $form, array &$form_state){
     $object = $form_state['islandora']['objects'][0];
     // Create OBJ datastream
+    $object->label = $form_state['values']['title'];
     if (empty($object['OBJ'])) {
         $ds = $object->constructDatastream('OBJ', 'M');
         $object->ingestDatastream($ds);
