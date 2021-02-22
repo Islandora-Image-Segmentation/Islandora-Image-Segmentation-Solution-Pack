@@ -38,6 +38,20 @@ function image_segmentation_theme($existing, $type, $theme, $path)
             'pattern' => 'image_segmentation_sidebar__',
             'variables' => array('object' => NULL),
         )
+}
+/**
+ * Implements hook_cmodel_pid_islandora_ingest_steps().
+ */
+function image_segmentation_islandora_segmentedImageCModel_islandora_ingest_steps(array $form_state)
+{
+    return array(
+        'image_segmentation_upload_segment' => array(
+            'weight' => 10,
+            'type' => 'form',
+            'form_id' => 'image_segmentation_upload_segment_form',
+            'module' => 'image_segmentation',
+            'file' => 'includes/upload_segment.form.inc',
+        ),
     );
 }
 
