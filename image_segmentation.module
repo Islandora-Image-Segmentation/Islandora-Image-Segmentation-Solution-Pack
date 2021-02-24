@@ -38,6 +38,7 @@ function image_segmentation_theme($existing, $type, $theme, $path)
             'pattern' => 'image_segmentation_sidebar__',
             'variables' => array('object' => NULL),
         )
+    );
 }
 /**
  * Implements hook_cmodel_pid_islandora_ingest_steps().
