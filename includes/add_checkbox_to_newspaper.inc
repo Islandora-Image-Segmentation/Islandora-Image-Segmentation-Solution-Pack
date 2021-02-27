@@ -10,5 +10,7 @@
       '#title' => t('Generate derivatives immediately'),
       '#description' => t('Determine whether the article being ingested is supposed to get derivatives generated right away or not'),
     );
+
+    return $form;
   }
 ?>
