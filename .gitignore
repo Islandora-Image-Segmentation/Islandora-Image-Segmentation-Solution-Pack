@@ -445,10 +445,10 @@ composer.lock
 *.box
 
 #### External Library
-lib/*
+lib/
 
 #### Vagrant
-vagrant/*
+vagrant/
 
 #### Ingest Data
-data/*
+data/
