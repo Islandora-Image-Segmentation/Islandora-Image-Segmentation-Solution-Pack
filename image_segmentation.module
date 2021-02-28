@@ -23,12 +23,13 @@ function image_segmentation_menu()
             'file' => 'includes/admin.form.inc',
             'type' => MENU_NORMAL_ITEM,
         ),
-      'content/article-segmentation-selection' => array(
-        'title' => t('Article Segmentation Selection'),
+      'manual_article_segmentation/form' => array(
+        'title' => t('Manual Article Segmentation'),
+        'page callback' => 'drupal_get_form',
+        'access arguments' => array('administer users'),
+        'page arguments' => array('manual_article_segmentation_form'),
         'description' => t('An Islandora page with a text field for submitting SOLR queries to select which articles get manually segmented'),
-        'page callback' => drupal_get_form('article_segmentation_selection_form'),
-        'access arguments' => array('query content'),
-        'type' => MENU_CALLBACK,
+        'type' => MENU_NORMAL_ITEM,
       ),
     );
 }
@@ -60,12 +61,6 @@ function image_segmentation_islandora_segmentedImageCModel_islandora_ingest_step
             'module' => 'image_segmentation',
             'file' => 'includes/upload_segment.form.inc',
         ),
-      'article_segmentation_selection' => array(
-        'type' => 'form',
-        'form_id' => 'article_segmentation_selection_form',
-        'module' => 'article_segmentation_selection',
-        'file' => 'includes/article_segmentation_selection.form.inc',
-      ),
     );
 }
 
@@ -107,3 +102,28 @@ function image_segmentation_islandora_required_objects(IslandoraTuque $connectio
     );
 }
 
+/**
+ * Solr query form.
+ * @return array
+ *   Returns Solr query form.
+ */
+
+function manual_article_segmentation_form($form, &$form_state) {
+  $form['query'] = array(
+    '#title' => t('Query'),
+    '#type' => 'textfield',
+    '#required' => TRUE,
+    '#descritpion' => t('Select which articles get manually segmented'),
+  );
+
+  $form['submit'] = array(
+    '#title' => t('Submit'),
+    '#type' => 'submit',
+  );
+
+  return $form;
+}
+
+function manual_article_segmentation_form_submit($form, &$form_state) {
+  drupal_set_message(t('The form has been submitted.'));
+}
