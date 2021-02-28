@@ -23,6 +23,13 @@ function image_segmentation_menu()
             'file' => 'includes/admin.form.inc',
             'type' => MENU_NORMAL_ITEM,
         ),
+      'content/article-segmentation-selection' => array(
+        'title' => t('Article Segmentation Selection'),
+        'description' => t('An Islandora page with a text field for submitting SOLR queries to select which articles get manually segmented'),
+        'page callback' => drupal_get_form('article_segmentation_selection_form'),
+        'access arguments' => array('query content'),
+        'type' => MENU_CALLBACK,
+      ),
     );
 }
 
@@ -37,7 +44,8 @@ function image_segmentation_theme($existing, $type, $theme, $path)
             'template' => 'theme/image-segmentation-segment',
             'pattern' => 'image_segmentation_sidebar__',
             'variables' => array('object' => NULL),
-        )
+        ),
+    );
 }
 /**
  * Implements hook_cmodel_pid_islandora_ingest_steps().
@@ -52,6 +60,12 @@ function image_segmentation_islandora_segmentedImageCModel_islandora_ingest_step
             'module' => 'image_segmentation',
             'file' => 'includes/upload_segment.form.inc',
         ),
+      'article_segmentation_selection' => array(
+        'type' => 'form',
+        'form_id' => 'article_segmentation_selection_form',
+        'module' => 'article_segmentation_selection',
+        'file' => 'includes/article_segmentation_selection.form.inc',
+      ),
     );
 }
 

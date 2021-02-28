@@ -5,7 +5,7 @@
  *   Returns Solr query form.
  */
 
-function solr_query_form($form, &$form_state) {
+function article_segmentation_selection_form($form, &$form_state) {
   $form['query'] = array(
     '#title' => t('Query'),
     '#type' => 'textfield',
@@ -21,6 +21,6 @@ function solr_query_form($form, &$form_state) {
   return $form;
 }
 
-function solr_query_form_submit($form, &$form_state) {
+function article_segmentation_selection_form_submit($form, &$form_state) {
   drupal_set_message(t('The form has been submitted.'));
 }
