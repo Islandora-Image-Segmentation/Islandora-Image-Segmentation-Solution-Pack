@@ -11,6 +11,9 @@
  * of its power and flexibility.
  * See https://api.drupal.org/api/drupal/modules!system!system.api.php/function/hook_menu/7
  */
+
+require_once dirname(__FILE__) . '/includes/add_checkbox_to_newspaper.inc';
+
 function image_segmentation_menu()
 {
     return array(
