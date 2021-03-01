@@ -94,3 +94,17 @@ function image_segmentation_islandora_required_objects(IslandoraTuque $connectio
     );
 }
 
+/**
+ * Implements hook_islandora_paged_content_page_management_tabs_alter().
+ */
+function image_segmentation_islandora_paged_content_page_management_tabs_alter(&$manage_tabs, $context)
+{
+    module_load_include('inc', 'image_segmentation','includes/generate_segment.form');
+    $manage_tabs['manage_page']['segments'] = array(
+      '#title' => t('Generate Segments'),
+      '#type' => 'fieldset',
+      'form' => drupal_get_form('image_segmentation_generate_segment_form', $context['object']),
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+    );
+}
