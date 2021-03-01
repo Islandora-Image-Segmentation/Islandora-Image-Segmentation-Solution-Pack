@@ -103,7 +103,7 @@ function islandora_newspaper_batch_form_alter(&$form, &$form_state, $form_id) {
 
   switch ($form_id)  {
     case 'islandora_newspaper_batch_form':
-      $form['generate_derivatives_immediately'] = array(
+      $form['generate_extracted_segments'] = array(
         '#type' => 'checkbox',
         '#title' => t('Generate extracted segments'),
         '#weight' => 0,
@@ -111,7 +111,7 @@ function islandora_newspaper_batch_form_alter(&$form, &$form_state, $form_id) {
       );
       break;
     case 'islandora_paged_content_upload_pdf_form':
-      $form['generate_derivatives_immediately'] = array(
+      $form['generate_extracted_segments'] = array(
         '#type' => 'checkbox',
         '#title' => t('Generate extracted segments'),
         '#weight' => 0,
