@@ -27,7 +27,7 @@ function image_segmentation_menu()
             'file' => 'includes/admin.form.inc',
             'type' => MENU_NORMAL_ITEM,
         ),
-      'manual_article_segmentation/form' => array(
+      'admin/islandora/manual_article_segmentation' => array(
         'title' => t('Manual Article Segmentation'),
         'page callback' => 'drupal_get_form',
         'access arguments' => array('administer users'),
