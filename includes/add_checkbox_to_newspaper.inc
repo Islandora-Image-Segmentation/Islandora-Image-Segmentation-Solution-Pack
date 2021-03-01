@@ -10,7 +10,7 @@
  * @return mixed
  */
 
-function islandora_ingest_form_alter (&$form, &$form_state, $form_id) {
+function islandora_ingest_form_alter(&$form, &$form_state, $form_id) {
 
   module_load_include('inc', 'islandora', 'includes/ingest.form');
 
