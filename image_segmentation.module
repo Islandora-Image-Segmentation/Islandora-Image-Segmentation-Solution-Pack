@@ -11,8 +11,12 @@
  * of its power and flexibility.
  * See https://api.drupal.org/api/drupal/modules!system!system.api.php/function/hook_menu/7
  */
+
+require_once dirname(__FILE__) . '/includes/manual_article_segmentation.form.inc';
+
 function image_segmentation_menu()
 {
+
     return array(
         'admin/islandora/segmentation' => array(
             'title' => 'Image Segmentaion Module',
@@ -100,30 +104,4 @@ function image_segmentation_islandora_required_objects(IslandoraTuque $connectio
             )
         )
     );
-}
-
-/**
- * Solr query form.
- * @return array
- *   Returns Solr query form.
- */
-
-function manual_article_segmentation_form($form, &$form_state) {
-  $form['query'] = array(
-    '#title' => t('Query'),
-    '#type' => 'textfield',
-    '#required' => TRUE,
-    '#descritpion' => t('Select which articles get manually segmented'),
-  );
-
-  $form['submit'] = array(
-    '#title' => t('Submit'),
-    '#type' => 'submit',
-  );
-
-  return $form;
-}
-
-function manual_article_segmentation_form_submit($form, &$form_state) {
-  drupal_set_message(t('The form has been submitted.'));
 }
