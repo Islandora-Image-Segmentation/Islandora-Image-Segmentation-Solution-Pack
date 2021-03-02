@@ -123,3 +123,9 @@ function islandora_newspaper_batch_form_alter(&$form, &$form_state, $form_id) {
   return $form;
 }
 
+function islandora_newspaper_batch_form_submit($form, &$form_state) {
+  if(isset($form['generate_extracted_segments'])){
+    
+  }
+}
+
