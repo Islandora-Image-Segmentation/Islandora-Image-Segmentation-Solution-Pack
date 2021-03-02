@@ -22,30 +22,40 @@ function template_preprocess_image_segmentation_segment(array &$variables) {
       $dsid = 'OBJ';
     }
 
-    $params = array();
+    $params = [];
     if (isset($object[$dsid]) && islandora_datastream_access(ISLANDORA_VIEW_OBJECTS, $object[$dsid])) {
       module_load_include('inc', 'islandora', 'includes/authtokens');
       $token = islandora_get_object_token($object->id, $dsid, 2);
       $params['token'] = $token;
       $params['pid'] = $object->id;
       $params['dsid'] = $dsid;
-    }
 
-    module_load_include('inc', 'islandora', 'includes/solution_packs');
-    $viewer_callback = islandora_get_viewer_callback('islandora_openseadragon');
-    if (function_exists($viewer_callback)) {
-      $viewer = $viewer_callback($params, $variables['object']);
-      if ($viewer) {
-        $variables['segment'] = $viewer;
+      module_load_include('inc', 'islandora', 'includes/solution_packs');
+      $viewer_callback = islandora_get_viewer_callback('islandora_openseadragon');
+      if (function_exists($viewer_callback)) {
+        $viewer = $viewer_callback($params, $variables['object']);
+        if ($viewer) {
+          $variables['segment'] = $viewer;
+        }
       }
     }
     // Fallback to image.
-    elseif (!isset($variables['segment']) && isset($object['JPG']) && islandora_datastream_access(ISLANDORA_VIEW_OBJECTS, $object['JPG'])) {
-      $params = [
-        'title' => $object->label,
-        'path' => url("islandora/object/{$object->id}/datastream/JPG/view"),
-      ];
-      $variables['segment'] = theme('image', $params);
+    else {
+      $dsid = '';
+      if (isset($object['JPG'])) {
+        $dsid = 'JPG';
+      }
+      elseif (strtolower($object['OBJ']->mimetype) == 'image/jpeg') {
+        $dsid = 'OBJ';
+      }
+      if
+      (isset($object[$dsid]) && islandora_datastream_access(ISLANDORA_VIEW_OBJECTS, $object[$dsid])) {
+        $params = [
+          'title' => $object->label,
+          'path' => url("islandora/object/{$object->id}/datastream/{$dsid}/view"),
+        ];
+        $variables['segment'] = theme('image', $params);
+      }
     }
   }
 }
