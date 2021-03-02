@@ -40,7 +40,7 @@ function template_preprocess_image_segmentation_segment(array &$variables) {
       }
     }
     // Fallback to image.
-    else {
+    if (!isset($variables['segment'])) {
       $dsid = '';
       if (isset($object['JPG'])) {
         $dsid = 'JPG';
