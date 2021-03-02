@@ -35,10 +35,16 @@ function image_segmentation_theme($existing, $type, $theme, $path)
         'image_segmentation_segment' => array(
             'file' => 'theme/theme.inc',
             'template' => 'theme/image-segmentation-segment',
-            'pattern' => 'image_segmentation_sidebar__',
+            'pattern' => 'image_segmentation__',
             'variables' => array('object' => NULL),
-        )
-    );
+        ),
+        'image_segmentation_segment_list' => array(
+          'file' => 'theme/theme.inc',
+          'template' => 'theme/image-segmentation-segment-list',
+          'pattern' => 'image_segmentation_list__',
+          'variables' => array('object' => NULL),
+        ),
+      );
 }
 /**
  * Implements hook_cmodel_pid_islandora_ingest_steps().
@@ -92,5 +98,36 @@ function image_segmentation_islandora_required_objects(IslandoraTuque $connectio
             )
         )
     );
+}
+
+/**
+ * Implements hook_block_info().
+ */
+function image_segmentation_block_info(){
+  $blocks = array(
+    'image_segment_list' => array(
+      'info' => t('Image Segment List'),
+      'cache' => DRUPAL_NO_CACHE,
+    ),
+  );
+  return $blocks;
+}
+
+/**
+ * Implements hook_block_view().
+ */
+function image_segmentation_block_view($delta = '') {
+  $block = array();
+  switch ($delta) {
+    case 'image_segment_list':
+      $object = menu_get_object('islandora_object', 2);
+      if (!isset($object)|| !array_intersect($object->models,['islandora:newspaperPageCModel'])  ) {
+        break;
+      }
+      $block['subject'] = t('Image Segments');
+      $block['content'] = theme('image_segmentation_segment_list', array('object' => $object));
+
+  }
+  return $block;
 }
 
