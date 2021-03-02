@@ -30,7 +30,7 @@ function image_segmentation_menu()
       'admin/islandora/manual_article_segmentation' => array(
         'title' => t('Manual Article Segmentation'),
         'page callback' => 'drupal_get_form',
-        'access arguments' => array('administer users'),
+        'access arguments' => array('administer site configuration'),
         'page arguments' => array('manual_article_segmentation_form'),
         'description' => t('An Islandora page with a text field for submitting SOLR queries to select which articles get manually segmented'),
         'type' => MENU_NORMAL_ITEM,
