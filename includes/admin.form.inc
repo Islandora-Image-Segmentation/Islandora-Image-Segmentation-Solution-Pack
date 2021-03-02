@@ -10,7 +10,7 @@
   * @return array
   *   Returns admin form.
   */
-  function islandora_api_admin_settings_form() {
+  function image_segmentation_admin_settings_form() {
     $form = array(
       "api_host" => array(
         '#type' => 'textfield',

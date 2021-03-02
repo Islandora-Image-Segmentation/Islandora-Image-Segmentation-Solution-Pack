@@ -12,13 +12,14 @@
  */
 function template_preprocess_image_segmentation_segment(array &$variables)
 {
-    $object = $variables['object'];
-    if (isset($object['OBJ'])) {
-        $obj_url = url("islandora/object/{$object->id}/datastream/OBJ/view");
-        $params = array(
-            'title' => $object->label,
-            'path' => $obj_url,
-        );
-        $variables['segment'] = theme('image', $params);
-    }
+  $object = $variables['object'];
+  if (isset($object['OBJ'])) {
+    $obj_url = url("islandora/object/{$object->id}/datastream/OBJ/view");
+    $params = array(
+      //            'title' => $object->label,
+      //            'path' => $obj_url,
+      'pid' => $object->id,
+    );
+    $variables['segment'] = theme('islandora_openseadragon_viewer', $params);
+  }
 }
