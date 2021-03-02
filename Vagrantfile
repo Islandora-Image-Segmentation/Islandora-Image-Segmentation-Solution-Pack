@@ -1,6 +1,7 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
+$name = "Islandora 7.x-1.x Newspaper Development Base VM"
 $cpus   = ENV.fetch("ISLANDORA_VAGRANT_CPUS", "2")
 $memory = ENV.fetch("ISLANDORA_VAGRANT_MEMORY", "3000")
 $hostname = ENV.fetch("ISLANDORA_VAGRANT_HOSTNAME", "islandora")
@@ -10,7 +11,15 @@ $multiple_vms  = ENV.fetch("ISLANDORA_VAGRANT_MULTIPLE_ISLANDORAS", "FALSE")
 Vagrant.configure("2") do |config|
 
   config.vm.provider "virtualbox" do |v|
-    v.name = "Islandora 7.x-1.x Newspaper Segmentaion Development VM"
+    v.name = $name
+    v.customize ["modifyvm", :id, "--memory", $memory]
+    v.customize ["modifyvm", :id, "--cpus", $cpus]
+  end
+
+  config.vm.provider "hyperv" do |h|
+    h.vmname = $name
+    h.cpus = $cpus
+    h.memory = $memory
   end
 
   config.vm.box = "spaceduck/IslandoraNewsDev"
@@ -26,11 +35,6 @@ Vagrant.configure("2") do |config|
     config.vm.network :forwarded_port, guest: 3306, host: 3306, id: 'MySQL', auto_correct: true
     config.vm.network :forwarded_port, guest: 8000, host: 8000, id: 'Apache', auto_correct: true
     config.vm.network :forwarded_port, guest: 22, host: 2222, id: "ssh", auto_correct: true
-  end
-
-  config.vm.provider "virtualbox" do |vb|
-    vb.customize ["modifyvm", :id, "--memory", $memory]
-    vb.customize ["modifyvm", :id, "--cpus", $cpus]
   end
 
   config.vm.synced_folder ".", "/var/www/drupal/sites/all/modules/Islandora-Image-Segementation-Solution-Pack"
