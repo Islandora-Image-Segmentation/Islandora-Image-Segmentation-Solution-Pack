@@ -1,7 +1,7 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-$name = "Islandora 7.x-1.x Newspaper Development Base VM"
+$name = "Islandora 7.x-1.x Image Segmentation Development VM"
 $cpus   = ENV.fetch("ISLANDORA_VAGRANT_CPUS", "2")
 $memory = ENV.fetch("ISLANDORA_VAGRANT_MEMORY", "3000")
 $hostname = ENV.fetch("ISLANDORA_VAGRANT_HOSTNAME", "islandora")
