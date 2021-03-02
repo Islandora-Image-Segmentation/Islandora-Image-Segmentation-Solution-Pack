@@ -10,8 +10,6 @@ $multiple_vms  = ENV.fetch("ISLANDORA_VAGRANT_MULTIPLE_ISLANDORAS", "FALSE")
 
 Vagrant.configure("2") do |config|
 
-  config.vm.box_version = "1.0.1"
-
   config.vm.provider "virtualbox" do |v|
     v.name = $name
     v.customize ["modifyvm", :id, "--memory", $memory]
