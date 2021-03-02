@@ -17,6 +17,7 @@ function manual_article_segmentation_form($form, &$form_state) {
   $form['submit'] = array(
     '#title' => t('Submit'),
     '#type' => 'submit',
+    '#value' => t('Submit'),
   );
 
   return $form;
