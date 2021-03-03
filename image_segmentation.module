@@ -96,7 +96,6 @@ function image_segmentation_islandora_required_objects(IslandoraTuque $connectio
 }
 
 /**
-<<<<<<< HEAD
  * Alter newspaper ingest forms
  */
 
@@ -110,9 +109,9 @@ function islandora_newspaper_batch_form_alter(&$form, &$form_state, $form_id) {
         '#weight' => 0,
         '#description' => t('Determine whether the articles being ingested are supposed to get derivatives generated right away or not'),
       );
-      if (isset($form['actions']['submit'])) {
-        $form['#submit'][] = 'generate_extracted_segments_handler_function';
-      }
+      
+      $form['#submit'][] = 'generate_extracted_segments_handler_function';
+      
       break;
     case 'islandora_paged_content_upload_pdf_form':
       $form['generate_extracted_segments'] = array(
@@ -121,9 +120,9 @@ function islandora_newspaper_batch_form_alter(&$form, &$form_state, $form_id) {
         '#weight' => 0,
         '#description' => t('Determine whether the article being ingested is supposed to get derivatives generated right away or not'),
       );
-      if (isset($form['actions']['submit'])) {
-        $form['#submit'][] = 'generate_extracted_segments_handler_function';
-      }
+      
+      $form['#submit'][] = 'generate_extracted_segments_handler_function';
+      
       break;
   }
 
