@@ -5,3 +5,4 @@ dependencies[] = islandora_newspaper
 package = Islandora Solution Packs
 version = 7.x-dev
 core = 7.x
+stylesheets[all][] = css/image_segmentation_segment_list.css
