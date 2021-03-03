@@ -34,6 +34,7 @@ function image_segmentation_menu()
         'page arguments' => array('manual_article_segmentation_form'),
         'description' => t('An Islandora page with a text field for submitting SOLR queries to select which articles get manually segmented'),
         'type' => MENU_NORMAL_ITEM,
+        'file' => 'includes/manual_article_segmentation.form.inc',
       ),
     );
 }
