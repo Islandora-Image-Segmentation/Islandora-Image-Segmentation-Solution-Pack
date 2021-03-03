@@ -12,8 +12,6 @@
  * See https://api.drupal.org/api/drupal/modules!system!system.api.php/function/hook_menu/7
  */
 
-require_once dirname(__FILE__) . '/includes/manual_article_segmentation.form.inc';
-
 function image_segmentation_menu()
 {
 
@@ -33,6 +31,7 @@ function image_segmentation_menu()
         'access arguments' => array('administer site configuration'),
         'page arguments' => array('manual_article_segmentation_form'),
         'description' => t('An Islandora page with a text field for submitting SOLR queries to select which articles get manually segmented'),
+        'file' => 'includes/manual_article_segmentation.form.inc',
         'type' => MENU_NORMAL_ITEM,
       ),
     );
