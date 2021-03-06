@@ -24,6 +24,8 @@
     $num_of_pages = 0;
 
     if(isset($solr_query)){
+      echo "<h4>Results: Page ". $page ."</h4><br>";
+
       $start = $page * 10 - 10;
       $url = "http://localhost:8080/solr/collection1/select?q=" . $solr_query . "&wt=json";
       $data = file_get_contents($url. "&fq=RELS_EXT_hasModel_uri_s:info\:fedora\/islandora\:newspaperPageCModel" . "&start=" . $start);
@@ -33,7 +35,10 @@
       $docs = $results['response']['docs'];
 
       foreach ($docs as $value) {
-        print "<p><strong>Title:</strong> {$value['dc.title'][0]}</p><br>";
+        print "<p><strong>PID:</strong> {$value['PID']}</p>";
+        print "<p><strong>Title:</strong> {$value['dc.title'][0]}</p>";
+        print "<p><strong>MIMETYPE:</strong> {$value['fedora_datastream_version_OBJ_MIMETYPE_mt'][0]}</p><br>";
+        print "<hr>";
       }
     }
   } catch (Exception $e) {
@@ -48,4 +53,5 @@
         }
         ?>
     </div>
+    <br>
 </div>
