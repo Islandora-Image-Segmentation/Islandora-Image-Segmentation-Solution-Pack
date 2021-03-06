@@ -26,14 +26,14 @@
     if(isset($solr_query)){
       $start = $page * 10 - 10;
       $url = "http://localhost:8080/solr/collection1/select?q=" . $solr_query . "&wt=json";
-      $data = file_get_contents($url . "&start=" . $start);
+      $data = file_get_contents($url. "&fq=RELS_EXT_hasModel_uri_s:info\:fedora\/islandora\:newspaperPageCModel" . "&start=" . $start);
       $results = json_decode($data, TRUE);
 
       $num_of_pages = ceil($results["response"]["numFound"] / 10);
       $docs = $results['response']['docs'];
 
       foreach ($docs as $value) {
-        print "<h5>Title: {$value['dc.title'][0]}</h5><br>";
+        print "<p><strong>Title:</strong> {$value['dc.title'][0]}</p><br>";
       }
     }
   } catch (Exception $e) {
