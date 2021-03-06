@@ -48,9 +48,15 @@ function image_segmentation_theme($existing, $type, $theme, $path)
             'template' => 'theme/image-segmentation-segment',
             'pattern' => 'image_segmentation_sidebar__',
             'variables' => array('object' => NULL),
-        )
+        ),
+      'image_segmentation_manual_segmentation_results' => array(
+        'file' => 'theme/theme.inc',
+        'template' => 'theme/image-segmentation-manual-segmentation-results',
+        'variables' => array('query' => NULL),
+      ),
     );
 }
+
 /**
  * Implements hook_cmodel_pid_islandora_ingest_steps().
  */
