@@ -29,7 +29,7 @@
           <?php foreach ($segments as &$segment) : ?>
               <div class="segment_preview">
                   <h3><?php print $segment['type'] ?>:</h3>
-                  <a href=<?php $segment['link'] ?>>
+                  <a href=<?php print $segment['link'] ?>>
                     <?php print theme('image', [
                       'path' => $segment['tn_url'],
                       'title' => $segment['object']->label,
