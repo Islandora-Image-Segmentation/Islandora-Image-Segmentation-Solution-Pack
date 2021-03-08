@@ -7,6 +7,8 @@ $memory = ENV.fetch("ISLANDORA_VAGRANT_MEMORY", "3000")
 $hostname = ENV.fetch("ISLANDORA_VAGRANT_HOSTNAME", "islandora")
 $forward = ENV.fetch("ISLANDORA_VAGRANT_FORWARD", "TRUE")
 $multiple_vms  = ENV.fetch("ISLANDORA_VAGRANT_MULTIPLE_ISLANDORAS", "FALSE")
+$newspaper_navigator_host  = ENV.fetch("NEWSPAPER_NAVIGATOR_HOST", "localhost")
+$newspaper_navigator_port  = ENV.fetch("NEWSPAPER_NAVIGATOR_PORT", "8008")
 
 Vagrant.configure("2") do |config|
 
@@ -47,6 +49,8 @@ Vagrant.configure("2") do |config|
      config.vm.network :private_network, ip: "33.33.33.10"
 
    end
+
+  config.vm.provision :shell, inline: "drush --root=/var/www/drupal/ en -u 1 -y composer_manager || echo '##### PLEASE IGNORE THE ERRORS #####' ", :privileged => false
 
   unless  $multiple_vms.eql? "FALSE"
     # Fires last to modify one last change.

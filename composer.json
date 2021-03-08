@@ -1,0 +1,11 @@
+{
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "http://github.com/Islandora-Image-Segmentation/Newspaper-Navigator-API-PHP-Client-Library"
+    }
+  ],
+  "require": {
+    "islandora_image_segmentation/php_client_library": "dev-dev"
+  }
+}
