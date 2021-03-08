@@ -48,6 +48,11 @@ Vagrant.configure("2") do |config|
 
    end
 
+
+  config.vm.provision :shell, inline: "drush --root=/var/www/drupal/ en -u 1 -y image_segmentation", :privileged => false
+  config.vm.provision :shell, inline: "drush --root=/var/www/drupal/ dl drush_extras", :privileged => false
+  config.vm.provision :shell, inline: "drush --root=/var/www/drupal/ block-configure  --module image_segmentation --delta image_segment_list --region sidebar_first", :privileged => false
+
   unless  $multiple_vms.eql? "FALSE"
     # Fires last to modify one last change.
     config.vm.provision "this",
