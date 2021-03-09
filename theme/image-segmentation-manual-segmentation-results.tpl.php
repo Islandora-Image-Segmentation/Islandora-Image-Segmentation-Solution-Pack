@@ -29,37 +29,44 @@
     if (isset($solr_query)) {
       echo "<h4>Results: Page " . $page . "</h4><br>";
 
+      $solr_query = str_replace(" ","",$solr_query);
+
       //Get SOLR results
 
       $start = $page * 10 - 10;
       $url = "http://localhost:8080/solr/collection1/select?q=" . $solr_query . "&wt=json";
       $data = file_get_contents($url . "&fq=RELS_EXT_hasModel_uri_s:info\:fedora\/islandora\:newspaperPageCModel" . "&start=" . $start);
-      $results = json_decode($data, TRUE);
+      
+      if(isset($data)){
+        $results = json_decode($data, TRUE);
 
-      $num_of_pages = ceil($results["response"]["numFound"] / 10);
-      $docs = $results['response']['docs'];
+        $num_of_pages = ceil($results["response"]["numFound"] / 10);
+        $docs = $results['response']['docs'];
 
-      //print results as HTML
+        //print results as HTML
 
-      foreach ($docs as $value) {
-        //Get object segments
+        if(isset($docs)){
+          foreach ($docs as $value) {
+            //Get object segments
 
-        $abstract_object = islandora_object_load($value['PID']);
-        $segments = image_segmentation_get_segments($abstract_object);
+            $abstract_object = islandora_object_load($value['PID']);
+            $segments = image_segmentation_get_segments($abstract_object);
 
-        //Check if object is segmented
+            //Check if object is segmented
 
-        $is_segmented = empty($segments) ? "No" : "Yes";
+            $is_segmented = empty($segments) ? "No" : "Yes";
 
-        print "<p><strong>PID:</strong> {$value['PID']}</p>";
-        print "<p><strong>Title:</strong> {$value['dc.title'][0]}</p>";
-        print "<p><strong>MIMETYPE:</strong> {$value['fedora_datastream_version_OBJ_MIMETYPE_mt'][0]}</p>";
-        print "<p><strong>Segmented:</strong> {$is_segmented}</p>";
-        print "<hr>";
+            print "<p><strong>PID:</strong> {$value['PID']}</p>";
+            print "<p><strong>Title:</strong> {$value['dc.title'][0]}</p>";
+            print "<p><strong>MIMETYPE:</strong> {$value['fedora_datastream_version_OBJ_MIMETYPE_mt'][0]}</p>";
+            print "<p><strong>Segmented:</strong> {$is_segmented}</p>";
+            print "<hr>";
+          }
+        }
       }
     }
   } catch (Exception $e) {
-    echo $e;
+    drupal_set_message("No results found", "error");
   }
   ?>
     <br>
