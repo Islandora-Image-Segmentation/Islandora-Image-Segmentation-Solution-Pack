@@ -7,7 +7,7 @@ $memory = ENV.fetch("ISLANDORA_VAGRANT_MEMORY", "3000")
 $hostname = ENV.fetch("ISLANDORA_VAGRANT_HOSTNAME", "islandora")
 $forward = ENV.fetch("ISLANDORA_VAGRANT_FORWARD", "TRUE")
 $multiple_vms  = ENV.fetch("ISLANDORA_VAGRANT_MULTIPLE_ISLANDORAS", "FALSE")
-$newspaper_navigator_host  = ENV.fetch("NEWSPAPER_NAVIGATOR_HOST", "localhost")
+$newspaper_navigator_host  = ENV.fetch("NEWSPAPER_NAVIGATOR_HOST", "10.0.2.2")
 $newspaper_navigator_port  = ENV.fetch("NEWSPAPER_NAVIGATOR_PORT", "8008")
 
 Vagrant.configure("2") do |config|
