@@ -18,7 +18,7 @@ function template_preprocess_image_segmentation_segment(array &$variables) {
     if (isset($object['JP2'])) {
       $dsid = 'JP2';
     }
-    elseif (strtolower($object['OBJ']->mimetype) == 'image/jp2') {
+    elseif (strpos(strtolower($object['OBJ']->mimetype), 'image') === 0) {
       $dsid = 'OBJ';
     }
 
