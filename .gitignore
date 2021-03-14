@@ -443,6 +443,3 @@ composer.lock
 #### Vagrant
 .vagrant/
 *.box
-
-#### Temp
-Vagrantfile
