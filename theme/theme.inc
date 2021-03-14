@@ -46,3 +46,12 @@ function template_preprocess_image_segmentation_segment_list(array &$variables) 
   }
 
 }
+
+function template_preprocess_image_segmentation_manual_segmentation_results(&$variables) {
+  $options = array(
+    'group' => JS_THEME,
+  );
+  
+  drupal_add_js(
+    drupal_get_path('module', 'image_segmentation').'/js/image_segmentation_manual_segmentation.js', $options);
+}

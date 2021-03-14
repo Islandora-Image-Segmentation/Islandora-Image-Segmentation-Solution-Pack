@@ -10,6 +10,8 @@
  *   Returns Solr query form.
  */
 
+module_load_include('inc', 'image_segmentation', 'includes/utilities');
+
 function manual_article_segmentation_form(array $form, &$form_state) {
   $form['query'] = array(
     '#title' => t('Query'),
@@ -30,7 +32,19 @@ function manual_article_segmentation_form(array $form, &$form_state) {
     '#query' => isset($form_state['values']['query']) ? $form_state['values']['query'] : NULL,
   );
 
+  if(isset($_COOKIE["updated_checkboxes"])){
+    $form['confirm'] = array(
+      '#type' => 'submit',
+      '#value' => t('Confirm for segmentation'),
+      '#submit' => array('confirm_for_segmentation'),
+    );
+  }
+
   return $form;
+}
+
+function confirm_for_segmentation () {
+  drupal_set_message($_COOKIE["updated_checkboxes"]);
 }
 
 function manual_article_segmentation_form_submit($form, &$form_state) {
