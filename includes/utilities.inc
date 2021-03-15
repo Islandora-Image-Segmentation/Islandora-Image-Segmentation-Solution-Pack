@@ -57,7 +57,13 @@ EOQ;
  *    The type of the image segment.
  */
 function image_segmentation_get_type(AbstractObject $object) {
-  return 'Advertisement';
+  $res = $object->relationships->get(ISLANDORA_RELS_INT_URI, 'hasImageCategory');
+  if (!isset($res[0]['predicate']['value'])) {
+    return 'Unknown';
+
+  }
+  return $res[0]['object']['value'];
+
 }
 
 function image_segmentation_get_content_types() {
