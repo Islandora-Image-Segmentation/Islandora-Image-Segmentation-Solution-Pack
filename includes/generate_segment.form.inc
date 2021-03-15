@@ -20,6 +20,11 @@ function image_segmentation_generate_segment_form(array $form, array &$form_stat
       '#type' => 'item',
       '#description' => t('You must have the <b>Image Segmentation API</b> confugured to extract image segments.'),
     ],
+    'force' => [
+      '#type' => 'checkbox',
+      '#title' => t('Force regeneration'),
+
+    ],
     'submit' => [
       '#disabled' => !$can_segment,
       '#type' => 'submit',
@@ -43,7 +48,7 @@ function image_segmentation_generate_segment_form(array $form, array &$form_stat
 function image_segmentation_generate_segment_form_submit(array $form, array &$form_state) {
   module_load_include('inc', 'image_segmentation', 'includes/utilities');
   $object = islandora_object_load($form_state['values']['pid']);
-  if (image_segmentation_extract_segments($object)) {
+  if (image_segmentation_extract_segments($object, $form_state['values']['force'])) {
     drupal_set_message(t('Successfully extracted segments.'));
   }
   else {

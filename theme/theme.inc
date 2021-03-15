@@ -14,14 +14,52 @@
 function template_preprocess_image_segmentation_segment(array &$variables) {
   $object = $variables['object'];
   if (isset($object['OBJ'])) {
-    $obj_url = url("islandora/object/{$object->id}/datastream/OBJ/view");
-    $params = [
-      'title' => $object->label,
-      'path' => $obj_url,
-    ];
-    $variables['segment'] = theme('image', $params);
+    $dsid = '';
+    if (isset($object['JP2'])) {
+      $dsid = 'JP2';
+    }
+    elseif (strpos(strtolower($object['OBJ']->mimetype), 'image') === 0) {
+      $dsid = 'OBJ';
+    }
+
+    $params = [];
+    if (isset($object[$dsid]) && islandora_datastream_access(ISLANDORA_VIEW_OBJECTS, $object[$dsid])) {
+      module_load_include('inc', 'islandora', 'includes/authtokens');
+      $token = islandora_get_object_token($object->id, $dsid, 2);
+      $params['token'] = $token;
+      $params['pid'] = $object->id;
+      $params['dsid'] = $dsid;
+
+      module_load_include('inc', 'islandora', 'includes/solution_packs');
+      $viewer_callback = islandora_get_viewer_callback('islandora_openseadragon');
+      if (function_exists($viewer_callback)) {
+        $viewer = $viewer_callback($params, $variables['object']);
+        if ($viewer) {
+          $variables['segment'] = $viewer;
+        }
+      }
+    }
+    // Fallback to image.
+    if (!isset($variables['segment'])) {
+      $dsid = '';
+      if (isset($object['JPG'])) {
+        $dsid = 'JPG';
+      }
+      elseif (strtolower($object['OBJ']->mimetype) == 'image/jpeg') {
+        $dsid = 'OBJ';
+      }
+      if
+      (isset($object[$dsid]) && islandora_datastream_access(ISLANDORA_VIEW_OBJECTS, $object[$dsid])) {
+        $params = [
+          'title' => $object->label,
+          'path' => url("islandora/object/{$object->id}/datastream/{$dsid}/view"),
+        ];
+        $variables['segment'] = theme('image', $params);
+      }
+    }
   }
 }
+
 
 /**
  * Prepares variables for image_segmentation_segment templates
@@ -38,12 +76,12 @@ function template_preprocess_image_segmentation_segment_list(array &$variables) 
   foreach ($segments as $segment) {
     $variables['segments'][] = [
       'object' => $segment,
-      'type' => image_segmentation_get_type($object),
-      'link' => url("islandora/object/{$object->id}/"),
-      'tn_url' => url("islandora/object/{$object->id}/datastream/TN/view"),
+      'type' => image_segmentation_get_type($segment),
+      'link' => url("islandora/object/{$segment->id}/"),
+      'tn_url' => url("islandora/object/{$segment->id}/datastream/TN/view"),
     ];
-    $variables['content_types'] = image_segmentation_get_content_types();
   }
+  $variables['content_types'] = image_segmentation_get_content_types();
 
 }
 
