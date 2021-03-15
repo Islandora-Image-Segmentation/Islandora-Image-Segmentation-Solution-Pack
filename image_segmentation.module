@@ -11,6 +11,7 @@
  * of its power and flexibility.
  * See https://api.drupal.org/api/drupal/modules!system!system.api.php/function/hook_menu/7
  */
+
 function image_segmentation_menu()
 {
     return array(
@@ -46,6 +47,7 @@ function image_segmentation_theme($existing, $type, $theme, $path)
         ),
       );
 }
+
 /**
  * Implements hook_cmodel_pid_islandora_ingest_steps().
  */
