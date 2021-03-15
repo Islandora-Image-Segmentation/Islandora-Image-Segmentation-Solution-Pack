@@ -12,31 +12,31 @@
   */
   function image_segmentation_admin_form() {
     $form = array(
-      "api_host" => array(
+      "image_segmentation_api_host" => array(
         '#type' => 'textfield',
         '#title' => t('API Host'),
-        '#default_value' => variable_get('api_host', 'localhost'),
+        '#default_value' => variable_get('image_segmentation_api_host', 'localhost'),
         '#description' => t('Host name for API'),
         '#size' => 50,
       ),
-      "api_port" => array(
+      "image_segmentation_api_port" => array(
         '#type' => 'textfield',
         '#title' => t('API Port'),
-        '#default_value' => variable_get('api_port', '8008'),
+        '#default_value' => variable_get('image_segmentation_api_port', '8008'),
         '#description' => t('Port number for API'),
         '#size' => 50,
       ),
-      "api_key" => array(
+      "image_segmentation_api_key" => array(
         '#type' => 'password',
         '#title' => t('API Key'),
-        '#default_value' => variable_get('api_key', 'abc'),
+        '#default_value' => variable_get('image_segmentation_api_key', 'abc'),
         '#description' => t('Key for API'),
         '#size' => 50,
       ),
-      "confidence_threshold" => array(
+      "image_segmentation_confidence_threshold" => array(
         '#type' => 'textfield',
         '#title' => t('API Confidence Threshold'),
-        '#default_value' => variable_get('confidense_threshold', '60.0'),
+        '#default_value' => variable_get('image_segmentation_confidence_threshold', '60.0'),
         '#description' => t('Confidence Threshold for API ML results'),
         '#size' => 50,
       ),
