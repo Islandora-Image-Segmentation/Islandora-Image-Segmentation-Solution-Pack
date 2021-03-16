@@ -65,24 +65,34 @@ function confirm_for_segmentation() {
  */
 
 function batch_segmentation() {
-    drupal_set_message(t("Segmentation started"));
     module_load_include('inc', 'image_segmentation', 'includes/utilities');
     
     $query_results = json_decode($_COOKIE["updated_checkboxes"], TRUE);
+    $operations = array();
 
     foreach($query_results as $pageInfo){
         if($pageInfo["checked"] == TRUE){
             $page = $abstract_object = islandora_object_load($pageInfo["pid"]);
             if(image_segmentation_can_segment($page)){
-                $operations[] = array('image_segmentation_extract_segments', array($page));
+                $operations[] = array('extractSegmentsFromPage', array($page));
             }
         }
     }
+
+    drupal_set_message(t("Segmentation started for @count pages", array('@count' => count($operations))));
 
     return  array(
         'operations' => $operations,
         'finished' => 'batch_segmentation_completed',
     );
+}
+
+function extractSegmentsFromPage($page, &$context){
+    module_load_include('inc', 'image_segmentation', 'includes/utilities');
+
+    $context['message'] = t('Processing page "@title"', array('@title' => $page["dc.title"]));
+
+    image_segmentation_extract_segments($page, TRUE);
 }
 
 /**
