@@ -41,7 +41,7 @@ function manual_article_segmentation_form(array $form, &$form_state) {
         $form['confirm'] = [
             '#type' => 'submit',
             '#value' => t('Confirm for segmentation'),
-            '#submit' => ['confirm_for_segmentation'],
+            '#submit' => ['manual_article_segmentation_confirm_for_segmentation'],
             '#attributes' => array("onclick" => "jQuery(this).click(function(event){event.preventDefault(); alert(\"yes\");});")
         ];
     }
@@ -53,18 +53,19 @@ function manual_article_segmentation_form(array $form, &$form_state) {
  * Calls batch segmentation api
  */
 
-function confirm_for_segmentation() {
-    batch_set(batch_segmentation());
-    background_batch_process_batch();
+function manual_article_segmentation_confirm_for_segmentation() {
+    batch_set(manual_article_segmentation_batch_segmentation());
+    batch_process();
+    //background_batch_process_batch();
 }
 
 /**
- * Creates segmentation request
+ * Creates segmentation request and initiates batch process
  *
  * @return array of operations
  */
 
-function batch_segmentation() {
+function manual_article_segmentation_batch_segmentation() {
     module_load_include('inc', 'image_segmentation', 'includes/utilities');
     
     $query_results = json_decode($_COOKIE["updated_checkboxes"], TRUE);
@@ -74,7 +75,7 @@ function batch_segmentation() {
         if($pageInfo["checked"] == TRUE){
             $page = $abstract_object = islandora_object_load($pageInfo["pid"]);
             if(image_segmentation_can_segment($page)){
-                $operations[] = array('extractSegmentsFromPage', array($page));
+                $operations[] = array('image_segmentation_batch_extract_segments_from_page', array($page));
             }
         }
     }
@@ -83,36 +84,8 @@ function batch_segmentation() {
 
     return  array(
         'operations' => $operations,
-        'finished' => 'batch_segmentation_completed',
+        'finished' => 'image_segmentation_batch_extract_segments_from_page_completed',
     );
-}
-
-function extractSegmentsFromPage($page, &$context){
-    module_load_include('inc', 'image_segmentation', 'includes/utilities');
-
-    $context['message'] = t('Processing page "@title"', array('@title' => $page["dc.title"]));
-
-    image_segmentation_extract_segments($page, TRUE);
-}
-
-/**
- * Displays batch process success or error upon completion
- */
-
-function batch_segmentation_completed($success, $results, $operations) {
-    if ($success) {
-        drupal_set_message(t('@count pages  processed.', array('@count' => count($results))));
-    } else {
-        // An error occurred.
-        // $operations contains the operations that remained unprocessed.
-        $error_operation = reset($operations);
-        drupal_set_message(
-            t(
-                'An error occurred while processing @operation with arguments : @args', 
-                array('@operation' => $error_operation[0], '@args' => print_r($error_operation[0], TRUE))
-            )
-        );
-    }
 }
 
 /**
