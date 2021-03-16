@@ -184,7 +184,7 @@ function image_segmentation_batch_extract_segments_from_page($page, &$context){
 
 function image_segmentation_batch_extract_segments_from_page_completed($success, $results, $operations) {
     if ($success) {
-        drupal_set_message(t('@count pages  processed.', array('@count' => count($results))));
+        drupal_set_message(t('@count pages processed', array('@count' => count($results))));
     } else {
         // An error occurred.
         // $operations contains the operations that remained unprocessed.
