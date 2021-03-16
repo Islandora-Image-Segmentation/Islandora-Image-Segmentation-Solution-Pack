@@ -10,8 +10,6 @@
  *   Returns Solr query form.
  */
 
-module_load_include('inc', 'image_segmentation', 'includes/utilities');
-
 /**
  * Adds a solr query form to the manual segmentation page
  *
@@ -25,7 +23,6 @@ function manual_article_segmentation_form(array $form, &$form_state) {
     $form['query'] = [
         '#title' => t('Query'),
         '#type' => 'textfield',
-        '#required' => TRUE,
         '#descritpion' => t('Select which articles get manually segmented'),
     ];
 
@@ -40,11 +37,12 @@ function manual_article_segmentation_form(array $form, &$form_state) {
         '#query' => isset($form_state['values']['query']) ? $form_state['values']['query'] : NULL,
     ];
 
-    if (isset($_COOKIE["updated_checkboxes"])) {
+    if (isset($form['form_output']["#query"]) || isset($_GET["page"])) {
         $form['confirm'] = [
             '#type' => 'submit',
             '#value' => t('Confirm for segmentation'),
             '#submit' => ['confirm_for_segmentation'],
+            '#attributes' => array("onclick" => "jQuery(this).click(function(event){event.preventDefault(); alert(\"yes\");});")
         ];
     }
 
@@ -52,13 +50,59 @@ function manual_article_segmentation_form(array $form, &$form_state) {
 }
 
 /**
- * Sends currently selected pages to newspaper api via drupal batch api
+ * Calls batch segmentation api
  */
 
 function confirm_for_segmentation() {
-    drupal_set_message($_COOKIE["updated_checkboxes"]);
+    batch_set(batch_segmentation());
+    background_batch_process_batch();
+}
 
-    batch_set(multi_page_segmentation());
+/**
+ * Creates segmentation request
+ *
+ * @return array of operations
+ */
+
+function batch_segmentation() {
+    drupal_set_message(t("Segmentation started"));
+    module_load_include('inc', 'image_segmentation', 'includes/utilities');
+    
+    $query_results = json_decode($_COOKIE["updated_checkboxes"], TRUE);
+
+    foreach($query_results as $pageInfo){
+        if($pageInfo["checked"] == TRUE){
+            $page = $abstract_object = islandora_object_load($pageInfo["pid"]);
+            if(image_segmentation_can_segment($page)){
+                $operations[] = array('image_segmentation_extract_segments', array($page));
+            }
+        }
+    }
+
+    return  array(
+        'operations' => $operations,
+        'finished' => 'batch_segmentation_completed',
+    );
+}
+
+/**
+ * Displays batch process success or error upon completion
+ */
+
+function batch_segmentation_completed($success, $results, $operations) {
+    if ($success) {
+        drupal_set_message(t('@count pages  processed.', array('@count' => count($results))));
+    } else {
+        // An error occurred.
+        // $operations contains the operations that remained unprocessed.
+        $error_operation = reset($operations);
+        drupal_set_message(
+            t(
+                'An error occurred while processing @operation with arguments : @args', 
+                array('@operation' => $error_operation[0], '@args' => print_r($error_operation[0], TRUE))
+            )
+        );
+    }
 }
 
 /**
