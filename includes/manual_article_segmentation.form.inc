@@ -54,9 +54,10 @@ function manual_article_segmentation_form(array $form, &$form_state) {
  */
 
 function manual_article_segmentation_confirm_for_segmentation() {
-    batch_set(manual_article_segmentation_batch_segmentation());
-    batch_process();
-    //background_batch_process_batch();
+    $batch = manual_article_segmentation_batch_segmentation();
+    batch_set($batch);
+
+    background_batch_process_batch("");
 }
 
 /**
@@ -73,17 +74,20 @@ function manual_article_segmentation_batch_segmentation() {
 
     foreach($query_results as $pageInfo){
         if($pageInfo["checked"] == TRUE){
-            $page = $abstract_object = islandora_object_load($pageInfo["pid"]);
+            $page = islandora_object_load($pageInfo["pid"]);
             if(image_segmentation_can_segment($page)){
                 $operations[] = array('image_segmentation_batch_extract_segments_from_page', array($page));
             }
         }
     }
 
-    drupal_set_message(t("Segmentation started for @count pages", array('@count' => count($operations))));
+    drupal_set_message(t("Segmentation started for @count page(s)", array('@count' => count($operations))));
 
     return  array(
         'operations' => $operations,
+        'init_message' => t('Segmentation is starting'),
+        'error_message' => t('Batch segmentation encountered an error'),
+        'progress_message' => t('Processed @current out of @total'),
         'finished' => 'image_segmentation_batch_extract_segments_from_page_completed',
     );
 }
