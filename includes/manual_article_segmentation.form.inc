@@ -34,10 +34,10 @@ function manual_article_segmentation_form(array $form, &$form_state) {
 
     $form['form_output'] = [
         '#theme' => 'image_segmentation_manual_segmentation_results',
-        '#query' => isset($form_state['values']['query']) ? $form_state['values']['query'] : NULL,
+        '#object' => isset($form_state['values']['query']) ? $form_state['values']['query'] : NULL,
     ];
 
-    if (isset($form['form_output']["#query"]) || isset($_GET["page"])) {
+    if (isset($form['form_output']["#query"]) || isset($_COOKIE["manual_segmentation_page"])) {
         $form['confirm'] = [
             '#type' => 'submit',
             '#value' => t('Confirm for segmentation'),
@@ -69,7 +69,7 @@ function manual_article_segmentation_confirm_for_segmentation() {
 function manual_article_segmentation_batch_segmentation() {
     module_load_include('inc', 'image_segmentation', 'includes/utilities');
     
-    $query_results = json_decode($_COOKIE["updated_checkboxes"], TRUE);
+    $query_results = json_decode($_COOKIE["manual_segmentation_updated_checkboxes"], TRUE);
     $total_for_segmentation = 0;
     $operations = array();
 

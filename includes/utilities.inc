@@ -208,3 +208,27 @@ function image_segmentation_ingest_segment(ExtractedSegment &$extractedSegment, 
     drupal_unlink($cropped_file);
     return $repository->ingestObject($segment);
 }
+
+function image_segmentation_get_newspaper_pages_from_solr($page, $solr_query) {
+
+    $num_of_pages = 0;
+
+    if (isset($solr_query)) {
+        echo "<h4>Results: Page " . $page . "</h4><br>";
+
+        $solr_query = str_replace(" ", "", $solr_query);
+
+        //Get SOLR results
+
+        $start = $page * 10 - 10;
+        $url = "http://localhost:8080/solr/collection1/select?q=" . $solr_query . "&wt=json";
+        $data = file_get_contents($url . "&fq=RELS_EXT_hasModel_uri_s:info\:fedora\/islandora\:newspaperPageCModel" . "&start=" . $start);
+
+        if (isset($data)) {
+            $results = json_decode($data, TRUE);
+
+            $num_of_pages = ceil($results["response"]["numFound"] / 10);
+            return array('docs' => $results['response']['docs'], 'num_of_pages' => $num_of_pages);
+        }
+    }
+}
