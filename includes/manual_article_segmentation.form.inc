@@ -70,13 +70,15 @@ function manual_article_segmentation_batch_segmentation() {
     module_load_include('inc', 'image_segmentation', 'includes/utilities');
     
     $query_results = json_decode($_COOKIE["updated_checkboxes"], TRUE);
+    $total_for_segmentation = 0;
     $operations = array();
 
     foreach($query_results as $pageInfo){
         if($pageInfo["checked"] == TRUE){
+            $total_for_segmentation++;
             $page = islandora_object_load($pageInfo["pid"]);
             if(image_segmentation_can_segment($page)){
-                $operations[] = array('image_segmentation_batch_extract_segments_from_page', array($page));
+                $operations[] = array('image_segmentation_batch_extract_segments_from_page', array($page, $total_for_segmentation));
             }
         }
     }
@@ -87,7 +89,7 @@ function manual_article_segmentation_batch_segmentation() {
         'operations' => $operations,
         'init_message' => t('Segmentation is starting'),
         'error_message' => t('Batch segmentation encountered an error'),
-        'progress_message' => t('Processed @current out of @total'),
+        'progress_message' => t('Batch segmentation process complete'),
         'finished' => 'image_segmentation_batch_extract_segments_from_page_completed',
     );
 }

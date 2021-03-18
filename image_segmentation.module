@@ -161,18 +161,23 @@ function image_segmentation_islandora_paged_content_page_management_tabs_alter(&
 
 /**
  * Implements drupal batch api to extract segments from pages
- * 
+ *
  * @param $page
+ * @param $total_pages
  * @param $context
  */
 
-function image_segmentation_batch_extract_segments_from_page($page, &$context){
+function image_segmentation_batch_extract_segments_from_page($page, $total_pages, &$context){
     module_load_include('inc', 'image_segmentation', 'includes/utilities');
 
-    $context['message'] = t('Processing page "@title"', array('@title' => $page["dc.title"][0]));
-    drupal_set_message(t('Processing page "@title"', array('@title' => $page["dc.title"][0])));
-
-    image_segmentation_extract_segments($page, TRUE);
+    if(image_segmentation_extract_segments($page, TRUE)){
+        $context['results'][] = $page;
+        $context['message'] = t('Completed page @queue_number out of @total_pages', array('@queue_number' => count($context['results']), '@total_pages' => $total_pages));
+    }
+    
+    if(count($context['results']) == $total_pages){
+        $context['finished'] = count($context['results']) / $total_pages;
+    }
 }
 
 /**
