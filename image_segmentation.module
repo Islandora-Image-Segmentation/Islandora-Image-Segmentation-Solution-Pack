@@ -22,7 +22,7 @@ function image_segmentation_menu() {
       'description' => 'Configure the Image Segmentation solution pack.',
       'page callback' => 'drupal_get_form',
       'access arguments' => ['administer site configuration'],
-      'page arguments' => ['image_segmentation_admin'],
+      'page arguments' => ['image_segmentation_admin_form'],
       'file' => 'includes/admin.form.inc',
       'type' => MENU_NORMAL_ITEM,
     ],
