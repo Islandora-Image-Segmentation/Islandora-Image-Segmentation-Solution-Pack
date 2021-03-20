@@ -40,13 +40,6 @@
         '#description' => t('Confidence Threshold for API ML results'),
         '#size' => 50,
       ),
-      "solr_article_query" => array(
-        '#type' => 'textfield',
-        '#title' => t('Solar Article Query'),
-        '#default_value' => '',
-        '#description' => t('Query string for selecting articles for processing'),
-        '#size' => 50,
-      ),
     );
 
     return system_settings_form($form);
