@@ -37,7 +37,7 @@ function manual_article_segmentation_form(array $form, &$form_state) {
         '#object' => isset($form_state['values']['query']) ? $form_state['values']['query'] : NULL,
     ];
 
-    if (isset($form['form_output']["#query"]) || isset($_COOKIE["manual_segmentation_page"])) {
+    if (isset($form['form_output']["#object"]) || isset($_COOKIE["manual_segmentation_page"])) {
         $form['confirm'] = [
             '#type' => 'submit',
             '#value' => t('Confirm for segmentation'),
