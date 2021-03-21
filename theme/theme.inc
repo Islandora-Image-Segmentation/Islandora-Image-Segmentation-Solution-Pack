@@ -76,11 +76,20 @@ function template_preprocess_image_segmentation_segment_list(array &$variables) 
   foreach ($segments as $segment) {
     $variables['segments'][] = [
       'object' => $segment,
-      'type' => image_segmentation_get_type($object),
-      'link' => url("islandora/object/{$object->id}/"),
-      'tn_url' => url("islandora/object/{$object->id}/datastream/TN/view"),
+      'type' => image_segmentation_get_type($segment),
+      'link' => url("islandora/object/{$segment->id}/"),
+      'tn_url' => url("islandora/object/{$segment->id}/datastream/TN/view"),
     ];
-    $variables['content_types'] = image_segmentation_get_content_types();
   }
+  $variables['content_types'] = image_segmentation_get_content_types();
 
+}
+
+function template_preprocess_image_segmentation_manual_segmentation_results(&$variables) {
+  $options = array(
+    'group' => JS_THEME,
+  );
+  
+  drupal_add_js(
+    drupal_get_path('module', 'image_segmentation').'/js/image_segmentation_manual_segmentation.js', $options);
 }

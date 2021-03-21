@@ -57,7 +57,13 @@ EOQ;
  *    The type of the image segment.
  */
 function image_segmentation_get_type(AbstractObject $object) {
-  return 'Advertisement';
+  $res = $object->relationships->get(ISLANDORA_RELS_INT_URI, 'hasImageCategory');
+  if (!isset($res[0]['predicate']['value'])) {
+    return 'Unknown';
+
+  }
+  return $res[0]['object']['value'];
+
 }
 
 function image_segmentation_get_content_types() {
@@ -199,6 +205,12 @@ function image_segmentation_ingest_segment(ExtractedSegment &$extractedSegment, 
     $ocr->mimetype = 'text/plain';
     $ocr->setContentFromString($extractedSegment->ocr_text);
     $segment->ingestDatastream($ocr);
+
+    $hocr = $segment->constructDatastream('HOCR', 'M');
+    $hocr->label = 'HOCR text';
+    $hocr->mimetype = 'text/html';
+    $hocr->setContentFromString($extractedSegment->hocr);
+    $segment->ingestDatastream($hocr);
 
     drupal_unlink($cropped_file);
     return $repository->ingestObject($segment);

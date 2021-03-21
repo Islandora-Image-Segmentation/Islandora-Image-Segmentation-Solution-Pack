@@ -443,3 +443,9 @@ composer.lock
 #### Vagrant
 .vagrant/
 *.box
+
+#### Local dev
+vagrant/
+lib/
+data/
+data/
