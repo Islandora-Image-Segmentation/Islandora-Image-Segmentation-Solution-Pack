@@ -205,6 +205,12 @@ function image_segmentation_ingest_segment(ExtractedSegment &$extractedSegment, 
     $ocr->setContentFromString($extractedSegment->ocr_text);
     $segment->ingestDatastream($ocr);
 
+    $hocr = $segment->constructDatastream('HOCR', 'M');
+    $hocr->label = 'HOCR text';
+    $hocr->mimetype = 'text/html';
+    $hocr->setContentFromString($extractedSegment->hocr);
+    $segment->ingestDatastream($hocr);
+
     drupal_unlink($cropped_file);
     return $repository->ingestObject($segment);
 }

@@ -16,26 +16,26 @@
 
 function image_segmentation_menu() {
 
-    return [
-        'admin/islandora/segmentation' => [
-            'title' => 'Image Segmentation Module',
-            'description' => 'Configure the Image Segmentation solution pack.',
-            'page callback' => 'drupal_get_form',
-            'access arguments' => ['administer site configuration'],
-            'page arguments' => ['image_segmentation_admin'],
-            'file' => 'includes/admin.form.inc',
-            'type' => MENU_NORMAL_ITEM,
-        ],
-        'admin/islandora/manual_article_segmentation' => [
-            'title' => t('Manual Article Segmentation'),
-            'page callback' => 'drupal_get_form',
-            'access arguments' => ['administer site configuration'],
-            'page arguments' => ['manual_article_segmentation_form'],
-            'description' => t('An Islandora page with a text field for submitting SOLR queries to select which articles get manually segmented'),
-            'file' => 'includes/manual_article_segmentation.form.inc',
-            'type' => MENU_NORMAL_ITEM,
-        ],
-    ];
+  return [
+    'admin/islandora/solution_pack_config/image_segmentation' => [
+      'title' => 'Image Segmentation Module',
+      'description' => 'Configure the Image Segmentation solution pack.',
+      'page callback' => 'drupal_get_form',
+      'access arguments' => ['administer site configuration'],
+      'page arguments' => ['image_segmentation_admin_form'],
+      'file' => 'includes/admin.form.inc',
+      'type' => MENU_NORMAL_ITEM,
+    ],
+    'admin/islandora/manual_article_segmentation' => [
+      'title' => t('Manual Article Segmentation'),
+      'page callback' => 'drupal_get_form',
+      'access arguments' => ['administer site configuration'],
+      'page arguments' => ['manual_article_segmentation_form'],
+      'description' => t('An Islandora page with a text field for submitting SOLR queries to select which articles get manually segmented'),
+      'file' => 'includes/manual_article_segmentation.form.inc',
+      'type' => MENU_NORMAL_ITEM,
+    ],
+  ];
 }
 
 /**
