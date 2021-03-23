@@ -36,7 +36,7 @@
       "confidence_threshold" => array(
         '#type' => 'textfield',
         '#title' => t('API Confidence Threshold'),
-        '#default_value' => variable_get('confidense_threshold', '60.0'),
+        '#default_value' => variable_get('confidense_threshold', '0.6'),
         '#description' => t('Confidence Threshold for API ML results'),
         '#size' => 50,
       ),
