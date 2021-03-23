@@ -95,7 +95,6 @@
       if(localStorage.getItem("manual_seg_checkbox_states") !== null){
         const checkbox_states = JSON.parse(localStorage.getItem("manual_seg_checkbox_states"));
         const checkboxes = document.getElementsByClassName("manual_segmentation_checkboxes");
-        console.log(checkbox_states);
 
         for (let i = 0; i < checkboxes.length; i++) {
           if(checkboxes[i].value in checkbox_states){
