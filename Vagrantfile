@@ -52,6 +52,7 @@ Vagrant.configure("2") do |config|
 
   config.vm.provision :shell, inline: "drush --root=/var/www/drupal/ en -u 1 -y composer_manager || echo '##### PLEASE IGNORE THE ERRORS #####' ", :privileged => false
   config.vm.provision :shell, inline: "drush --root=/var/www/drupal/ en -u 1 -y image_segmentation", :privileged => false
+  config.vm.provision :shell, inline: "drush --root=/var/www/drupal/ en -u 1 -y background_batch", :privileged => false
   config.vm.provision :shell, inline: "drush --root=/var/www/drupal/ vset api_host $1", :args => $newspaper_navigator_host, :privileged => false
   config.vm.provision :shell, inline: "drush --root=/var/www/drupal/ vset api_port $1", :args => $newspaper_navigator_port, :privileged => false
   config.vm.provision :shell, inline: "drush --root=/var/www/drupal/ dl drush_extras", :privileged => false
