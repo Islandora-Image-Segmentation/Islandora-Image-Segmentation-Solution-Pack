@@ -130,7 +130,7 @@ function image_segmentation_extract_segments(AbstractObject $object, bool $force
     return FALSE;
   }
 
-  $threshold = variable_get('confidence_threshold', 0.6);
+  $threshold = variable_get('image_segmentation_confidence_threshold', 0.6);
   for ($i = 1; $i <= $response->segment_count; $i++) {
     if($response->segments[$i-1]->confidence >= $threshold){
       $ingested = image_segmentation_ingest_segment($response->segments[$i - 1], $i, $object, $filename);
