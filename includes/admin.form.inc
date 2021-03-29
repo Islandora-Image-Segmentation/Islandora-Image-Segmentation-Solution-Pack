@@ -29,7 +29,7 @@
       "image_segmentation_api_key" => array(
         '#type' => 'password',
         '#title' => t('API Key'),
-        '#default_value' => variable_get('image_segmentation_api_key', 'abc'),
+        '#default_value' => variable_get('image_segmentation_api_key', ""),
         '#description' => t('Key for API'),
         '#size' => 50,
       ),
