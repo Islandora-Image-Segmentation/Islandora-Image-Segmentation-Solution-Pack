@@ -9,3 +9,4 @@ core = 7.x
 stylesheets[all][] = css/image_segmentation_segment_list.css
 files[] = tests/image_segmentation_ingest_purge.test
 files[] = tests/image_segmentation_generate_segments.test
+files[] = tests/image_segmentation_connection.test
