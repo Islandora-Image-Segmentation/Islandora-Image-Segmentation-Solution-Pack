@@ -11,9 +11,6 @@
      *   query
      *   results.
      */
-
-    drupal_add_css(drupal_get_path('module', 'image_segmentation') . '/css/image_segmentation_segment_list.css');
-    module_load_include('inc', 'image_segmentation', 'includes/utilities');
     ?>
     
     <table>
