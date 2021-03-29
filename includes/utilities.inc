@@ -119,7 +119,7 @@ function image_segmentation_extract_segments(AbstractObject $object, bool $force
 
   $api_host = variable_get("image_segmentation_api_host");
   $api_port = variable_get("image_segmentation_api_port");
-  $api_key = variable_get("image_segmentation_api_key", 60.0);
+  $api_key = variable_get("image_segmentation_api_key", "");
   $api_timeout = variable_get("image_segmentation_timeout", 60.0);
   $client = new SegmentationClient("{$api_host}:{$api_port}/api/", $api_timeout, $api_key);
 
@@ -238,4 +238,28 @@ function image_segmentation_get_newspaper_pages_from_solr($page, $solr_query) {
             return array('docs' => $results['response']['docs'], 'num_of_pages' => $num_of_pages);
         }
     }
+}
+
+
+/**
+ * Hits a dummy endpoint in the API to see if it is accessible.
+ *
+ * @return boolan
+ *  Whether or not the connection was successful.
+ */
+function check_api_connection() {
+  $api_host = variable_get("image_segmentation_api_host");
+  $api_port = variable_get("image_segmentation_api_port");
+  $api_key = variable_get("image_segmentation_api_key", 60.0);
+  $api_timeout = variable_get("image_segmentation_timeout", 60.0);
+  try {
+    $client = new SegmentationClient("{$api_host}:{$api_port}/test/", $api_timeout, $api_key);
+    $response = $client->segmentBase64("");
+    assert($response["status_code"] == 200);
+    drupal_set_message("Successfully connected to API.");
+    return True;
+  } catch (Exception $e) {
+    drupal_set_message("Error connecting to API: " . $e, "error");
+    return False;
+  }
 }
