@@ -130,13 +130,16 @@ function image_segmentation_extract_segments(AbstractObject $object, bool $force
     return FALSE;
   }
 
+  $threshold = variable_get('image_segmentation_confidence_threshold', 0.6);
   for ($i = 1; $i <= $response->segment_count; $i++) {
-    $ingested = image_segmentation_ingest_segment($response->segments[$i - 1], $i, $object, $filename);
-    if (!isset($ingested)) {
-      drupal_set_message("Failed to ingest segment", "error");
-      return FALSE;
+    if($response->segments[$i-1]->confidence >= $threshold){
+      $ingested = image_segmentation_ingest_segment($response->segments[$i - 1], $i, $object, $filename);
+      if (!isset($ingested)) {
+        drupal_set_message("Failed to ingest segment", "error");
+        return FALSE;
+      }
+      drupal_set_message("Ingested <a href='/islandora/object/{$ingested->id}'>$ingested->id</a>");
     }
-    drupal_set_message("Ingested <a href='/islandora/object/{$ingested->id}'>$ingested->id</a>");
   }
   drupal_unlink($filename);
 
