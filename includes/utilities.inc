@@ -117,10 +117,11 @@ function image_segmentation_extract_segments(AbstractObject $object, bool $force
     return FALSE;
   }
 
-  $api_host = variable_get("api_host");
-  $api_port = variable_get("api_port");
-  $api_timeout = variable_get("api_timeout", 60.0);
-  $client = new SegmentationClient("{$api_host}:{$api_port}/api/", $api_timeout);
+  $api_host = variable_get("image_segmentation_api_host");
+  $api_port = variable_get("image_segmentation_api_port");
+  $api_key = variable_get("image_segmentation_api_key", 60.0);
+  $api_timeout = variable_get("image_segmentation_timeout", 60.0);
+  $client = new SegmentationClient("{$api_host}:{$api_port}/api/", $api_timeout, $api_key);
 
   $filename = image_segmentation_get_uploaded_file($object['OBJ']);
   $response = $client->segmentFile($filename);
@@ -129,13 +130,16 @@ function image_segmentation_extract_segments(AbstractObject $object, bool $force
     return FALSE;
   }
 
+  $threshold = variable_get('image_segmentation_confidence_threshold', 0.6);
   for ($i = 1; $i <= $response->segment_count; $i++) {
-    $ingested = image_segmentation_ingest_segment($response->segments[$i - 1], $i, $object, $filename);
-    if (!isset($ingested)) {
-      drupal_set_message("Failed to ingest segment", "error");
-      return FALSE;
+    if($response->segments[$i-1]->confidence >= $threshold){
+      $ingested = image_segmentation_ingest_segment($response->segments[$i - 1], $i, $object, $filename);
+      if (!isset($ingested)) {
+        drupal_set_message("Failed to ingest segment", "error");
+        return FALSE;
+      }
+      drupal_set_message("Ingested <a href='/islandora/object/{$ingested->id}'>$ingested->id</a>");
     }
-    drupal_set_message("Ingested <a href='/islandora/object/{$ingested->id}'>$ingested->id</a>");
   }
   drupal_unlink($filename);
 
