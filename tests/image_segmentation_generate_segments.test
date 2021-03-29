@@ -30,10 +30,21 @@ class ImageSegmentationGenerateSegmentsTestCase extends IslandoraCollectionWebTe
      */
     public function setUp() {
         // Include required modules
+
+        $api_host = variable_get("image_segmentation_api_host");
+        $api_port = variable_get("image_segmentation_api_port");
+        $api_key = variable_get("image_segmentation_api_key", "");
+        $api_timeout = variable_get("image_segmentation_timeout", 60.0);
+
         parent::setUp(
             'islandora_basic_collection',
             'image_segmentation',
         );
+
+        variable_set("image_segmentation_api_host", $api_host);
+        variable_set("image_segmentation_api_port", $api_port);
+        variable_set("image_segmentation_api_key", $api_key);
+        variable_set("image_segmentation_timeout", $api_timeout);
 
         // Creates a user and logs in
         $user = $this->drupalCreateUser(array_keys(module_invoke_all('permission')));
