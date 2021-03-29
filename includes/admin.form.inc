@@ -29,14 +29,14 @@
       "api_key" => array(
         '#type' => 'password',
         '#title' => t('API Key'),
-        '#default_value' => variable_get('api_key', 'abc'),
+        '#default_value' => variable_get('api_key', ""),
         '#description' => t('Key for API'),
         '#size' => 50,
       ),
       "confidence_threshold" => array(
         '#type' => 'textfield',
         '#title' => t('API Confidence Threshold'),
-        '#default_value' => variable_get('confidense_threshold', '0.6'),
+        '#default_value' => variable_get('confidence_threshold', '0.6'),
         '#description' => t('Confidence Threshold for API ML results'),
         '#size' => 50,
       ),
