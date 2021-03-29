@@ -117,10 +117,11 @@ function image_segmentation_extract_segments(AbstractObject $object, bool $force
     return FALSE;
   }
 
-  $api_host = variable_get("api_host");
-  $api_port = variable_get("api_port");
-  $api_timeout = variable_get("api_timeout", 60.0);
-  $client = new SegmentationClient("{$api_host}:{$api_port}/api/", $api_timeout);
+  $api_host = variable_get("image_segmentation_api_host");
+  $api_port = variable_get("image_segmentation_api_port");
+  $api_key = variable_get("image_segmentation_api_key", 60.0);
+  $api_timeout = variable_get("image_segmentation_timeout", 60.0);
+  $client = new SegmentationClient("{$api_host}:{$api_port}/api/", $api_timeout, $api_key);
 
   $filename = image_segmentation_get_uploaded_file($object['OBJ']);
   $response = $client->segmentFile($filename);
@@ -205,6 +206,36 @@ function image_segmentation_ingest_segment(ExtractedSegment &$extractedSegment, 
     $ocr->setContentFromString($extractedSegment->ocr_text);
     $segment->ingestDatastream($ocr);
 
+    $hocr = $segment->constructDatastream('HOCR', 'M');
+    $hocr->label = 'HOCR text';
+    $hocr->mimetype = 'text/html';
+    $hocr->setContentFromString($extractedSegment->hocr);
+    $segment->ingestDatastream($hocr);
+
     drupal_unlink($cropped_file);
     return $repository->ingestObject($segment);
+}
+
+function image_segmentation_get_newspaper_pages_from_solr($page, $solr_query) {
+
+    $num_of_pages = 0;
+
+    if (isset($solr_query)) {
+        echo "<h4>Results: Page " . $page . "</h4><br>";
+
+        $solr_query = str_replace(" ", "", $solr_query);
+
+        //Get SOLR results
+
+        $start = $page * 10 - 10;
+        $url = "http://localhost:8080/solr/collection1/select?q=" . $solr_query . "&wt=json";
+        $data = file_get_contents($url . "&fq=RELS_EXT_hasModel_uri_s:info\:fedora\/islandora\:newspaperPageCModel" . "&start=" . $start);
+
+        if (isset($data)) {
+            $results = json_decode($data, TRUE);
+
+            $num_of_pages = ceil($results["response"]["numFound"] / 10);
+            return array('docs' => $results['response']['docs'], 'num_of_pages' => $num_of_pages);
+        }
+    }
 }

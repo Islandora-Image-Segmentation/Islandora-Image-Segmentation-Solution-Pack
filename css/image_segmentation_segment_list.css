@@ -6,3 +6,16 @@
   margin: auto;
 }
 
+/* Manual Segmentation Pagination */
+#manual-article-segmentation-pagination li{
+  text-decoration: none !important;
+  display: inline-block;
+  cursor: pointer;
+  padding-right: 10px;
+}
+
+.manual_segmentation_pagination_active a{
+  font-weight: bold;
+  color: black;
+}
+
