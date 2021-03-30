@@ -26,7 +26,7 @@ A configuration page can be found at Administration » Islandora » Solution Pac
 The configuration page allows you to set the following parameters:
 
 1. API Host: The hostname where your API is running. For example, `localhost` or `37.53.12.12`.
-2. API Port: The port that your API is running on. For example, `8000`.
+2. API Port: The port that your API is running on. For example, `8008`.
 3. API Key: The API key that your API is using. Can be left blank if the API was not launched with a key.
 4. Confidence Threshold: A number between 0 and 1. All returned segments below this threshold will not be ingested.
 
