@@ -99,39 +99,21 @@ function image_segmentation_islandora_required_objects(IslandoraTuque $connectio
  * Alter newspaper ingest forms
  */
 
-function islandora_newspaper_batch_form_alter(&$form, &$form_state, $form_id) {
+function image_segmentation_form_alter(&$form, &$form_state, $form_id) {
+  form_load_include($form_state,'inc', 'image_segmentation', 'includes/add_generate_segments.form');
 
   switch ($form_id)  {
     case 'islandora_newspaper_batch_form':
-      $form['generate_extracted_segments'] = array(
-        '#type' => 'checkbox',
-        '#title' => t('Generate extracted segments'),
-        '#weight' => 0,
-        '#description' => t('Determine whether the articles being ingested are supposed to get derivatives generated right away or not'),
-      );
-      
-      $form['#submit'][] = 'generate_extracted_segments_handler_function';
-      
-      break;
     case 'islandora_paged_content_upload_pdf_form':
-      $form['generate_extracted_segments'] = array(
-        '#type' => 'checkbox',
-        '#title' => t('Generate extracted segments'),
-        '#weight' => 0,
-        '#description' => t('Determine whether the article being ingested is supposed to get derivatives generated right away or not'),
-      );
-      
-      $form['#submit'][] = 'generate_extracted_segments_handler_function';
-      
-      break;
+    case 'islandora_paged_content_upload_page_form':
+      $form['image_segmentation_settings'] = image_segmentation_add_generate_segments_form($form_state);
+      array_unshift($form['next']['#submit'] ,  'image_segmentation_add_generate_extracted_segments_handler');
+    break;
   }
 
   return $form;
 }
 
-function generate_extracted_segments_handler_function($form, &$form_state) {
-  drupal_set_message(t('Form submitted'));
-}
 
 /**
  * Implements hook_islandora_paged_content_page_management_tabs_alter().
