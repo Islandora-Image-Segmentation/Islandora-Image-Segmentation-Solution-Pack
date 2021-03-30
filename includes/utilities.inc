@@ -2,6 +2,8 @@
 
 use NewspaperNavigator\SegmentationClient;
 use NewspaperNavigator\ExtractedSegment;
+use NewspaperNavigator\BoundingBox;
+use GuzzleHttp\Client;
 
 /**
  * Gets all the segments in the given newspaper page.
@@ -119,7 +121,7 @@ function image_segmentation_extract_segments(AbstractObject $object, bool $force
 
   $api_host = variable_get("image_segmentation_api_host");
   $api_port = variable_get("image_segmentation_api_port");
-  $api_key = variable_get("image_segmentation_api_key", 60.0);
+  $api_key = variable_get("image_segmentation_api_key", "");
   $api_timeout = variable_get("image_segmentation_timeout", 60.0);
   $client = new SegmentationClient("{$api_host}:{$api_port}/api/", $api_timeout, $api_key);
 
@@ -190,17 +192,24 @@ function image_segmentation_ingest_segment(ExtractedSegment &$extractedSegment, 
     $segment->relationships->add(ISLANDORA_RELS_INT_URI, 'hasImageCategory', $extractedSegment->classification);
     $segment->models = ['islandora:segmentedImageCModel'];
 
-    $image = new Imagick($file);
-    $cropped = \NewspaperNavigator\cropImage($image, $extractedSegment->bounding_box);
-    $mime_detector = new MimeDetect();
-    $ext = $mime_detector->getExtension($image->getImageMimeType());
-    $cropped_file = file_create_filename("cropped.{$ext}", 'temporary://');
-    $cropped->writeImage(drupal_realpath($cropped_file));
-
     $datastream = $segment->constructDatastream('OBJ', 'M');
     $datastream->label = 'OBJ';
-    $datastream->mimetype = $cropped->getImageMimeType();
-    $datastream->setContentFromFile($cropped_file);
+    if($parent['OBJ']->mimetype == 'image/jp2'){
+         $datastream->mimetype = 'image/jp2';
+         image_segmentation_crop_jp2($parent['OBJ'],$datastream,$extractedSegment->bounding_box);
+    }
+    else{
+        $image = new Imagick($file);
+        $cropped = \NewspaperNavigator\cropImage($image, $extractedSegment->bounding_box);
+        $mime_detector = new MimeDetect();
+        $ext = $mime_detector->getExtension($image->getImageMimeType());
+        $cropped_file = file_create_filename("cropped.{$ext}", 'temporary://');
+        $cropped->writeImage(drupal_realpath($cropped_file));
+
+        $datastream->mimetype = $cropped->getImageMimeType();
+        $datastream->setContentFromFile($cropped_file);
+        drupal_unlink($cropped_file);
+    }
     $segment->ingestDatastream($datastream);
 
     $ocr = $segment->constructDatastream('OCR', 'M');
@@ -215,7 +224,6 @@ function image_segmentation_ingest_segment(ExtractedSegment &$extractedSegment, 
     $hocr->setContentFromString($extractedSegment->hocr);
     $segment->ingestDatastream($hocr);
 
-    drupal_unlink($cropped_file);
     return $repository->ingestObject($segment);
 }
 
@@ -241,4 +249,46 @@ function image_segmentation_get_newspaper_pages_from_solr($page, $solr_query) {
             return array('docs' => $results['response']['docs'], 'num_of_pages' => $num_of_pages);
         }
     }
+}
+
+function image_segmentation_crop_jp2(AbstractDatastream &$source, AbstractDatastream &$dest, BoundingBox $bounding_box) {
+  $client = new Client(
+    ['base_uri' => variable_get('djatoka_base_uri','http://localhost:8080/adore-djatoka/')]
+  );
+  $url = url("islandora/object/{$source->parent->id}/datastream/{$source->id}/view",
+    [
+      'absolute' => TRUE,
+      //      'query' => array(
+      //        'token' => $token,
+      //      ),
+      'language' => language_default(),
+      'https' => FALSE,
+    ]
+  );
+  $meta = json_decode($client->get('resolver', [
+    'query' => [
+      'url_ver' => 'Z39.88-2004',
+      'rft_id' => $url,
+      'svc_id' => 'info:lanl-repo/svc/getMetadata',
+    ],
+  ])->getBody());
+
+  $x = (int) ($bounding_box->upper_left_x * $meta->width);
+  $y = (int) ($bounding_box->upper_left_y * $meta->height);
+  $width = (int) (($bounding_box->lower_right_x - $bounding_box->upper_left_x) * $meta->width);
+  $height = (int) (($bounding_box->lower_right_y - $bounding_box->upper_left_y) * $meta->height);
+
+  $query = [
+    'url_ver' => 'Z39.88-2004',
+    'rft_id' => $url,
+    'svc_id' => 'info:lanl-repo/svc/getRegion',
+    'svc_val_fmt' => 'info:ofi/fmt:kev:mtx:png',
+    'svc.format' => 'image/jp2',
+    'svc.region' => "{$y},{$x},{$height},{$width}",
+  ];
+
+  $response = $client->get('resolver', ['query' => $query]);
+
+  $dest->content = $response->getBody();
+
 }
