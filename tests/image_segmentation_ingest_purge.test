@@ -1,0 +1,82 @@
+<?php
+
+/**
+ * @file Attempts to ingest a segment into a page
+ */
+
+/**
+ * Class ImageSegmentationSegmentIngestTestCase
+ */
+class ImageSegmentationSegmentIngestTestCase extends IslandoraCollectionWebTestCase {
+
+  /**
+   * Get test information.
+   *
+   * @see IslandoraWebTestCase::getInfo()
+   */
+  public static function getInfo() {
+    return [
+      'name' => 'Image segment Ingest/Purge',
+      'description' => 'Ingests and purges an issue from an image segment',
+      'group' => 'Image Segmentation',
+    ];
+  }
+
+
+  /**
+   * Set up the test environment.
+   *
+   * @see IslandoraWebTestCase::setUp()
+   */
+  public function setUp() {
+    // Include required modules
+    parent::setUp(
+      'islandora_basic_collection',
+      'image_segmentation',
+    ); 
+
+    // Creates a user and logs in
+    $user = $this->drupalCreateUser(array_keys(module_invoke_all('permission')));
+    $this->drupalLogin($user);
+  }
+
+  public function testIngestPurgeImageSegment() {
+    
+    // Creates a segment collection
+    $label = $this->randomName(16);
+    $suffix = $this->randomName(16);
+    $collection_pid = 'islandora:' . $suffix;
+    $this->createTestCollection($label, 'islandora:segmentedImageCModel', $collection_pid);
+
+    // Attempts to create the newspaper.
+    $path = 'islandora/object/' . $collection_pid . '/manage/overview/ingest';
+    $segment_title = $this->randomName(16);
+    $file = drupal_get_path('module', 'image_segmentation') . '/tests/fixtures/segment.tiff';
+    $ocr_text = $this->randomString(100);
+    $edit = [
+      'title' => $segment_title,
+      'ocr' => $ocr_text,
+      'files[file]' => drupal_realpath($file),
+    ];
+    $this->drupalPost($path, $edit, t('Ingest'));
+
+    // Tests for correct datastreams
+    $datastreams = [
+      'RELS-EXT',
+      'DC',
+      'OCR',
+      'OBJ',
+    ];
+    $segment_pid = $this->getObjectFromPath($this->url);
+    $this->assertDatastreams($segment_pid, $datastreams);
+
+    // Tests for correct datastream content/type
+    $datastreams = array(
+      array('OBJ', 'tiff'),
+      array('OCR', 'text', array($ocr_text, 1)),
+    );
+    $this->validateDatastreams($segment_pid, $datastreams);
+
+  }
+
+}

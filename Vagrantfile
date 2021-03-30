@@ -54,8 +54,13 @@ Vagrant.configure("2") do |config|
   config.vm.provision :shell, inline: "drush --root=/var/www/drupal/ en -u 1 -y image_segmentation", :privileged => false
   config.vm.provision :shell, inline: "drush --root=/var/www/drupal/ vset image_segmentation_api_host $1", :args => $newspaper_navigator_host, :privileged => false
   config.vm.provision :shell, inline: "drush --root=/var/www/drupal/ vset image_segmentation_api_port $1", :args => $newspaper_navigator_port, :privileged => false
+  config.vm.provision :shell, inline: "drush --root=/var/www/drupal/ en -u 1 -y simpletest", :privileged => false
+  config.vm.provision :shell, inline: "chown -R www-data:www-data /var/www/drupal/sites/default/", :privileged => true
+  config.vm.provision :shell, inline: "chmod 666 /usr/local/fedora/server/config/filter-drupal.xml", :privileged => true
+  config.vm.provision :shell, inline: "rm -rf /var/www/drupal/sites/all/modules/islandora_scholar/", :privileged => false
   config.vm.provision :shell, inline: "drush --root=/var/www/drupal/ dl drush_extras", :privileged => false
   config.vm.provision :shell, inline: "drush --root=/var/www/drupal/ block-configure  --module image_segmentation --delta image_segment_list --region sidebar_first", :privileged => false
+  config.vm.provision :shell, inline: "drush --root=/var/www/drupal/ cache-clear all", :privileged => false
 
   unless  $multiple_vms.eql? "FALSE"
     # Fires last to modify one last change.
