@@ -56,3 +56,8 @@ To try the solution pack out, you can use a Vagrant virtual machine which has an
 4. Go to **Modules** in the top bar, enable **Islandora Image Segmentation Solution Pack**, and save your configuration.
 5. All done! You now have an Islandora instance running with this solution pack installed. 
 
+## Cancelling a batch process
+
+1. Navigate to your drupal root folder in terminal (normally '/var/www/drupal')
+1. Get the id of your batch job found at {site-url}/config/system/batch/overview (ex. http://localhost:8000/admin/config/system/batch/overview)
+1. Replace {batch id} with the id obtained in step 2 and run `drush -y -u 1 sql-query "DELETE FROM batch WHERE bid IN ({batch id});"`
