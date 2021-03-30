@@ -146,6 +146,26 @@ function image_segmentation_block_view($delta = '') {
 }
 
 /**
+ * Alter newspaper ingest forms
+ */
+
+function image_segmentation_form_alter(&$form, &$form_state, $form_id) {
+  form_load_include($form_state,'inc', 'image_segmentation', 'includes/add_generate_segments.form');
+
+  switch ($form_id)  {
+    case 'islandora_newspaper_batch_form':
+    case 'islandora_paged_content_upload_pdf_form':
+    case 'islandora_paged_content_upload_page_form':
+      $form['image_segmentation_settings'] = image_segmentation_add_generate_segments_form($form_state);
+      array_unshift($form['next']['#submit'] ,  'image_segmentation_add_generate_extracted_segments_handler');
+    break;
+  }
+
+  return $form;
+}
+
+
+/**
  * Implements hook_islandora_paged_content_page_management_tabs_alter().
  */
 function image_segmentation_islandora_paged_content_page_management_tabs_alter(&$manage_tabs, $context) {
