@@ -11,9 +11,6 @@
      *   query
      *   results.
      */
-
-    drupal_add_css(drupal_get_path('module', 'image_segmentation') . '/css/image_segmentation_segment_list.css');
-    module_load_include('inc', 'image_segmentation', 'includes/utilities');
     ?>
     
     <table>
@@ -89,37 +86,4 @@
         ?>
     </div>
     <br>
-    <script>
-      const COOKIE_EXPIRY_IN_MINUTES = 30;
-      
-      //Pagination
-      function handle_page_change(page, query){
-        const current_date = new Date();
-        current_date.setMinutes(current_date.getMinutes() + COOKIE_EXPIRY_IN_MINUTES);
-
-        document.cookie = "manual_segmentation_page=" + page + "; expires=" + current_date.toUTCString();
-        document.cookie = "manual_segmentation_query=" + JSON.stringify(query) + "; expires=" + current_date.toUTCString();
-        window.location.href = window.location.href;
-      }
-
-      //POST updated checkbox information back to manual segmentation page
-      function updated_checkboxes() {
-        const checkboxes = document.getElementsByClassName("manual_segmentation_checkboxes");
-        let updated_checkboxes = [];
-
-        for (let i = 0; i < checkboxes.length; i++) {
-          updated_checkboxes.push({
-            pid: checkboxes[i].value,
-            checked: checkboxes[i].checked
-          });
-        }
-
-        const current_date = new Date();
-        current_date.setMinutes(current_date.getMinutes() + COOKIE_EXPIRY_IN_MINUTES);
-
-        document.cookie = "manual_segmentation_updated_checkboxes=" + JSON.stringify(updated_checkboxes) + "; expires=" + current_date.toUTCString();
-      }
-
-      updated_checkboxes();
-    </script>
 </div>
