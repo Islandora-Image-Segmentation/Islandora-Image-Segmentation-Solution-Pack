@@ -26,18 +26,23 @@
     <div class="segment_list_section">
         <h2>Segments</h2>
         <div id="segment_list_gallery">
-          <?php foreach ($segments as &$segment) : ?>
-              <div class="segment_preview">
-                  <h3><?php print $segment['type'] ?>:</h3>
-                  <a href=<?php print $segment['link'] ?>>
-                    <?php print theme('image', [
-                      'path' => $segment['tn_url'],
-                      'title' => $segment['object']->label,
+            <?php if (count($segments) > 0): ?>
+                <?php foreach ($segments as &$segment) : ?>
+                    <div class="segment_preview">
+                        <h3><?php print $segment['type'] ?>:</h3>
+                        <a href=<?php print $segment['link'] ?>>
+                            <?php print theme('image', [
+                              'path' => $segment['tn_url'],
+                              'title' => $segment['object']->label,
 
-                    ]) ?>
-                  </a>
-              </div>
-          <?php endforeach ?>
+                            ]) ?>
+                        </a>
+                    </div>
+                <?php endforeach ?>
+          <?php endif; ?>
+          <?php if (count($segments) == 0): ?>
+            <p>This page has no segments of the requested type.</p>
+          <?php endif; ?>
         </div>
     </div>
 </div>

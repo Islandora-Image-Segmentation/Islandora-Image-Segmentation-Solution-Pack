@@ -36,14 +36,14 @@
       "image_segmentation_confidence_threshold" => array(
         '#type' => 'textfield',
         '#title' => t('API Confidence Threshold'),
-        '#default_value' => variable_get('image_segmentation_confidence_threshold', '66.6'),
+        '#default_value' => variable_get('image_segmentation_confidence_threshold', '0.6'),
         '#description' => t('Confidence Threshold for API ML results'),
         '#size' => 50,
       ),
       "image_segmentation_timeout" => array(
         '#type' => 'textfield',
         '#title' => t('API Confidence Threshold'),
-        '#default_value' => variable_get('image_segmentation_timeout', '120.0'),
+        '#default_value' => variable_get('image_segmentation_timeout', '60.0'),
         '#description' => t('How long to wait for a response in seconds.'),
         '#size' => 50,
       )

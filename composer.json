@@ -6,6 +6,7 @@
     }
   ],
   "require": {
-    "islandora_image_segmentation/php_client_library": "dev-dev"
+    "islandora_image_segmentation/php_client_library": "dev-dev",
+    "guzzlehttp/guzzle": "^7.2"
   }
 }

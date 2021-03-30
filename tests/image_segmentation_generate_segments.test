@@ -1,0 +1,87 @@
+<?php
+
+/**
+ * @file Attempts to generate segments from a page
+ */
+
+/**
+ * Class ImageSegmentationGenerateSegmentsTestCase
+ */
+
+class ImageSegmentationGenerateSegmentsTestCase extends IslandoraCollectionWebTestCase {
+
+    /**
+     * Get test information.
+     *
+     * @see IslandoraWebTestCase::getInfo()
+     */
+    public static function getInfo() {
+        return [
+            'name' => 'Generate segments',
+            'description' => 'Generates segments from an issue',
+            'group' => 'Image Segmentation',
+        ];
+    }
+
+    /**
+     * Set up the test environment.
+     *
+     * @see IslandoraWebTestCase::setUp()
+     */
+    public function setUp() {
+        // Include required modules
+
+        $api_host = variable_get("image_segmentation_api_host");
+        $api_port = variable_get("image_segmentation_api_port");
+        $api_key = variable_get("image_segmentation_api_key", "");
+        $api_timeout = variable_get("image_segmentation_timeout", 60.0);
+
+        parent::setUp(
+            'islandora_basic_collection',
+            'image_segmentation',
+        );
+
+        variable_set("image_segmentation_api_host", $api_host);
+        variable_set("image_segmentation_api_port", $api_port);
+        variable_set("image_segmentation_api_key", $api_key);
+        variable_set("image_segmentation_timeout", $api_timeout);
+
+        // Creates a user and logs in
+        $user = $this->drupalCreateUser(array_keys(module_invoke_all('permission')));
+        $this->drupalLogin($user);
+    }
+
+    public function testGenerateSegments() {
+
+        // Creates a segment collection
+        $label = $this->randomName(16);
+        $suffix = $this->randomName(16);
+        $collection_pid = 'islandora:' . $suffix;
+        $this->createTestCollection($label, 'islandora:segmentedImageCModel', $collection_pid);
+
+        // Attempts to create the newspaper.
+        $path = 'islandora/object/' . $collection_pid . '/manage/overview/ingest';
+        $segment_title = $this->randomName(16);
+        $file = drupal_get_path('module', 'image_segmentation') . '/tests/fixtures/segment.tiff';
+        $ocr_text = $this->randomString(100);
+        $edit = [
+            'title' => $segment_title,
+            'ocr' => $ocr_text,
+            'files[file]' => drupal_realpath($file),
+        ];
+        $this->drupalPost($path, $edit, t('Ingest'));
+
+        $segment_pid = $this->getObjectFromPath($this->url);
+        $test_page = islandora_object_load($segment_pid);
+
+        module_load_include('inc', 'image_segmentation', 'includes/utilities');
+
+        $this->assertTrue(image_segmentation_extract_segments($segment_pid, TRUE), 'Failed to extract segments');
+
+        //Confirm ingestion of segments
+
+        $segments = image_segmentation_get_segments($test_page);
+
+        $this->assertNotEqual(count($segments), 0, 'No segments generated');
+    }
+}
