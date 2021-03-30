@@ -51,6 +51,20 @@ Vagrant.configure("2") do |config|
    end
 
   config.vm.provision "shell", inline: <<-SHELL
+    sudo apt-get update
+    sudo apt-get install -y php7.4-xdebug
+    cat << 'EOF' >> xdebug.ini
+[xdebug]
+zend_extension=xdebug.so
+xdebug.mode=debug
+xdebug.client_host=10.0.2.2
+xdebug.client_port=9003
+EOF
+    sudo mv xdebug.ini /etc/php/7.4/mods-available/
+    sudo systemctl  restart apache2
+  SHELL
+
+  config.vm.provision "shell", inline: <<-SHELL
     drush --root=/var/www/drupal/ en -u 1 -y composer_manager || echo '##### PLEASE IGNORE THE ERRORS #####'
     drush --root=/var/www/drupal/ en -u 1 -y image_segmentation
     drush --root=/var/www/drupal/ dl drush_extras
