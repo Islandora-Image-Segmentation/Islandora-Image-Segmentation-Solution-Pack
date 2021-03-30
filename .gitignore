@@ -443,12 +443,3 @@ composer.lock
 #### Vagrant
 .vagrant/
 *.box
-
-#### External Library
-lib/
-
-#### Vagrant
-vagrant/
-
-#### Ingest Data
-data/
