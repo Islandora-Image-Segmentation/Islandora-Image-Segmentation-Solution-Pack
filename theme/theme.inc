@@ -84,3 +84,9 @@ function template_preprocess_image_segmentation_segment_list(array &$variables) 
     $variables['content_types'] = image_segmentation_get_content_types();
 
 }
+
+function template_preprocess_image_segmentation_manual_segmentation_results(array &$variables) {
+    drupal_add_js(drupal_get_path('module', 'image_segmentation') . 'js/manual_segmentation_results.js');
+    drupal_add_css(drupal_get_path('module', 'image_segmentation') . '/css/image_segmentation_segment_list.css');
+    module_load_include('inc', 'image_segmentation', 'includes/utilities');
+}
