@@ -121,7 +121,7 @@ function image_segmentation_extract_segments(AbstractObject $object, bool $force
 
   $api_host = variable_get("image_segmentation_api_host");
   $api_port = variable_get("image_segmentation_api_port");
-  $api_key = variable_get("image_segmentation_api_key", 60.0);
+  $api_key = variable_get("image_segmentation_api_key", "");
   $api_timeout = variable_get("image_segmentation_timeout", 60.0);
   $client = new SegmentationClient("{$api_host}:{$api_port}/api/", $api_timeout, $api_key);
 
