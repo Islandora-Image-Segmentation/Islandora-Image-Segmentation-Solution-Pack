@@ -303,7 +303,7 @@ function check_api_connection() {
   $api_host = variable_get("image_segmentation_api_host");
   $api_port = variable_get("image_segmentation_api_port");
   $api_key = variable_get("image_segmentation_api_key", "");
-  $api_timeout = variable_get("image_segmentation_timeout", 60.0);
+  $api_timeout = variable_get("image_segmentation_timeout", 5);
   try {
     $client = new SegmentationClient("{$api_host}:{$api_port}/test/", $api_timeout, $api_key);
     $response = $client->segmentBase64("abc");
@@ -314,5 +314,4 @@ function check_api_connection() {
     drupal_set_message("Error connecting to API: " . $e, "error");
     return False;
   }
-}
 }
