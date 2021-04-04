@@ -3,23 +3,29 @@ const COOKIE_EXPIRY_IN_MINUTES = 10;
 (function ($) {
   window.onload = function () {
 
-    if(localStorage.getItem("manual_seg_checkbox_states") !== null){
+    if (localStorage.getItem("manual_seg_checkbox_states") !== null) {
       const checkbox_states = JSON.parse(localStorage.getItem("manual_seg_checkbox_states"));
       const checkboxes = document.getElementsByClassName("manual_segmentation_checkboxes");
 
       for (let i = 0; i < checkboxes.length; i++) {
-        if(checkboxes[i].value in checkbox_states){
+        if (checkboxes[i].value in checkbox_states) {
           checkboxes[i].checked = checkbox_states[checkboxes[i].value];
-        }else {
+        }
+        else {
           checkboxes[i].checked = true;
         }
       }
 
       updated_checkboxes();
-    }else{
+    }
+    else {
       updated_checkboxes();
     }
   }
+
+  window.onpopstate = function () {
+    localStorage.removeItem("manual_seg_checkbox_states");
+  };
 }(jQuery));
 
 //POST updated checkbox information back to manual segmentation page
@@ -37,7 +43,7 @@ function updated_checkboxes() {
     updated_checkboxes_map[checkboxes[i].value] = checkboxes[i].checked;
   }
 
-  if(localStorage.getItem("manual_seg_checkbox_states") !== null){
+  if (localStorage.getItem("manual_seg_checkbox_states") !== null) {
     updated_checkboxes_map = {...JSON.parse(localStorage.getItem("manual_seg_checkbox_states")), ...updated_checkboxes_map};
   }
 
@@ -50,9 +56,9 @@ function updated_checkboxes() {
 }
 
 //Pagination
-function handle_page_change(page, query){
+function handle_page_change(page, query) {
   const current_date = new Date();
-  
+
   current_date.setMinutes(current_date.getMinutes() + COOKIE_EXPIRY_IN_MINUTES);
 
   document.cookie = "manual_segmentation_page=" + page + "; expires=" + current_date.toUTCString();

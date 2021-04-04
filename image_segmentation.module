@@ -187,12 +187,12 @@ function image_segmentation_islandora_paged_content_page_management_tabs_alter(&
  * @param $context
  */
 
-function image_segmentation_batch_extract_segments_from_page($page, $total_pages, &$context){
+function image_segmentation_batch_extract_segments_from_page($page, $total_pages, $page_number, &$context){
     module_load_include('inc', 'image_segmentation', 'includes/utilities');
 
     if(image_segmentation_extract_segments($page, TRUE)){
         $context['results'][] = $page;
-        $context['message'] = t('Completed page @queue_number out of @total_pages', array('@queue_number' => count($context['results']), '@total_pages' => $total_pages));
+        $context['message'] = t('Completed page @queue_number out of @total_pages', array('@queue_number' => $page_number, '@total_pages' => $total_pages));
     }
     
     if(count($context['results']) == $total_pages){
