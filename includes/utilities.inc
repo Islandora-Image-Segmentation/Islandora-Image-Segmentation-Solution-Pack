@@ -292,3 +292,26 @@ function image_segmentation_crop_jp2(AbstractDatastream &$source, AbstractDatast
   $dest->content = $response->getBody();
 
 }
+
+/**
+ * Hits a dummy endpoint in the API to see if it is accessible.
+ *
+ * @return boolean
+ *  Whether or not the connection was successful.
+ */
+function check_api_connection() {
+  $api_host = variable_get("image_segmentation_api_host");
+  $api_port = variable_get("image_segmentation_api_port");
+  $api_key = variable_get("image_segmentation_api_key", "");
+  $api_timeout = variable_get("image_segmentation_timeout", 5);
+  try {
+    $client = new SegmentationClient("{$api_host}:{$api_port}/test/", $api_timeout, $api_key);
+    $response = $client->segmentBase64("abc");
+    assert($response->status_code == 0);
+    drupal_set_message("Successfully connected to API.");
+    return True;
+  } catch (Exception $e) {
+    drupal_set_message("Error connecting to API: " . $e, "error");
+    return False;
+  }
+}
