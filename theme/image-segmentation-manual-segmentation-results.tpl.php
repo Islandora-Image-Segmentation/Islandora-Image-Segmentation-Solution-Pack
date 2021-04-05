@@ -14,6 +14,10 @@
     ?>
     
     <table>
+        <div class="manual_segmentation_options">
+            <label>Select all:&nbsp;&nbsp;</label>
+            <input id="manual_segmentation_select_all" type="checkbox" onclick="select_all_checkboxes()"/>
+        </div>
         <thead>
             <tr>
                 <td>PID</td>

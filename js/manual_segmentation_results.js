@@ -1,7 +1,7 @@
 const COOKIE_EXPIRY_IN_MINUTES = 10;
 
 (function ($) {
-  window.onload = function () {
+  document.ready = function () {
 
     if (localStorage.getItem("manual_seg_checkbox_states") !== null) {
       const checkbox_states = JSON.parse(localStorage.getItem("manual_seg_checkbox_states"));
@@ -64,4 +64,20 @@ function handle_page_change(page, query) {
   document.cookie = "manual_segmentation_page=" + page + "; expires=" + current_date.toUTCString();
   document.cookie = "manual_segmentation_query=" + JSON.stringify(query) + "; expires=" + current_date.toUTCString();
   window.location.href = window.location.href;
+}
+
+//Select all checkbox
+function select_all_checkboxes(){
+  const selectAllCheckbox = document.getElementById("manual_segmentation_select_all");
+  const checkboxes = document.getElementsByClassName("manual_segmentation_checkboxes");
+  
+  if(selectAllCheckbox.checked == true){
+    for(var i = 0; i < checkboxes.length; i++){
+      checkboxes[i].checked = true;
+    }
+  }else{
+    for(var i = 0; i < checkboxes.length; i++){
+      checkboxes[i].checked = false;
+    }
+  }
 }
