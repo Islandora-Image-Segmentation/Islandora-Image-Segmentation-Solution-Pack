@@ -80,4 +80,6 @@ function select_all_checkboxes(){
       checkboxes[i].checked = false;
     }
   }
+
+  updated_checkboxes();
 }
