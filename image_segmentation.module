@@ -42,7 +42,7 @@ function image_segmentation_menu() {
           'access arguments' => ['administer site configuration'],
           'page arguments' => ['mymodule_custom_search_form'],
           'file' => 'includes/textbox.form.inc',
-          'http' => [
+          'http' => [ //
               'method' => 'POST',
               //'content' => http_build_query('http://33.33.33.10:8080/adore-djatoka')
           ],
