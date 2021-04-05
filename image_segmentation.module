@@ -35,6 +35,21 @@ function image_segmentation_menu() {
       'file' => 'includes/manual_article_segmentation.form.inc',
       'type' => MENU_NORMAL_ITEM,
     ],
+      'content/image' => [
+          'title' => 'Image Segmentaion',
+          'description' => 'Configure the Image Segmentation solution pack.',
+          'page callback' => 'drupal_get_form',
+          'access arguments' => ['administer site configuration'],
+          'page arguments' => ['mymodule_custom_search_form'],
+          'file' => 'includes/textbox.form.inc',
+          'http' => [
+              'method' => 'POST',
+              //'content' => http_build_query('http://33.33.33.10:8080/adore-djatoka')
+          ],
+          'type' => MENU_NORMAL_ITEM
+          ],
+
+
   ];
 }
 
