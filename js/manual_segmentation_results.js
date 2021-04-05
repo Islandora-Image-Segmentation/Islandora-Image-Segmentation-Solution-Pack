@@ -2,6 +2,7 @@ const COOKIE_EXPIRY_IN_MINUTES = 10;
 
 (function ($) {
   document.ready = function () {
+    console.log(localStorage.getItem("manual_seg_checkbox_states"));
 
     if (localStorage.getItem("manual_seg_checkbox_states") !== null) {
       const checkbox_states = JSON.parse(localStorage.getItem("manual_seg_checkbox_states"));

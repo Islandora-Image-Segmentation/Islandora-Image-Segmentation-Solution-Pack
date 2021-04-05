@@ -67,7 +67,7 @@
                 print "<td><strong>Title:</strong> {$value['dc.title'][0]}</td>";
                 print "<td><strong>MIMETYPE:</strong> {$value['fedora_datastream_version_OBJ_MIMETYPE_mt'][0]}</td>";
                 print "<td><strong>Segmented:</strong> {$is_segmented}</td>";
-                print "<td><strong>Choose for segmentation:</strong> <input onclick=\"updated_checkboxes()\" $should_be_checked type=\"checkbox\" class=\"manual_segmentation_checkboxes\" value=\"{$value['PID']}\" name=\"{$value['PID']}\"></td>";
+                print "<td><strong>Choose for segmentation:</strong> <input onclick=\"updated_checkboxes()\" ".$should_be_checked." type=\"checkbox\" class=\"manual_segmentation_checkboxes\" value=\"{$value['PID']}\" name=\"{$value['PID']}\"></td>";
                 print "</tr>";
             }
         }
