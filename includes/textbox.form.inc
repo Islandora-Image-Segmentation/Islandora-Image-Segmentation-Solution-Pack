@@ -28,7 +28,7 @@ $form['submit'] = array(
 
 $form['#submit'] = array('mymodule_custom_search_form_submit');
 
-return $form;
+return $form; //
 }
 
 function mymodule_custom_search_form_submit($form, &$form_state) {
