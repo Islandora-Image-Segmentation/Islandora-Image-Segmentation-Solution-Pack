@@ -2,7 +2,6 @@ const COOKIE_EXPIRY_IN_MINUTES = 10;
 
 (function ($) {
   document.ready = function () {
-    console.log(localStorage.getItem("manual_seg_checkbox_states"));
 
     if (localStorage.getItem("manual_seg_checkbox_states") !== null) {
       const checkbox_states = JSON.parse(localStorage.getItem("manual_seg_checkbox_states"));
@@ -43,12 +42,6 @@ function updated_checkboxes() {
 
     updated_checkboxes_map[checkboxes[i].value] = checkboxes[i].checked;
   }
-
-  if (localStorage.getItem("manual_seg_checkbox_states") !== null) {
-    updated_checkboxes_map = {...JSON.parse(localStorage.getItem("manual_seg_checkbox_states")), ...updated_checkboxes_map};
-  }
-
-  localStorage.setItem("manual_seg_checkbox_states", JSON.stringify(updated_checkboxes_map));
 
   const current_date = new Date();
   current_date.setMinutes(current_date.getMinutes() + COOKIE_EXPIRY_IN_MINUTES);
