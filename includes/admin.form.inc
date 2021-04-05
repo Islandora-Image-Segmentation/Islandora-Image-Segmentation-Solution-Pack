@@ -27,7 +27,7 @@
         '#size' => 50,
       ),
       "image_segmentation_api_key" => array(
-        '#type' => 'password',
+        '#type' => 'textfield',
         '#title' => t('API Key'),
         '#default_value' => variable_get('image_segmentation_api_key', ""),
         '#description' => t('Key for API'),
