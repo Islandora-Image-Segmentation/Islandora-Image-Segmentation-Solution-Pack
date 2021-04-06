@@ -223,3 +223,40 @@ function image_segmentation_batch_extract_segments_from_page_completed($success,
         );
     }
 }
+
+/**
+ * Implements hook_cmodel_pid_islandora_derivative().
+ */
+function image_segmentation_islandora_segmentedImageCModel_islandora_derivative() {
+  $large_image_module_path = drupal_get_path('module', 'islandora_large_image');
+
+  return array(
+    array(
+      'source_dsid' => 'OBJ',
+      'destination_dsid' => 'TN',
+      'weight' => 0,
+      'function' => array(
+        'islandora_large_image_create_tn_derivative',
+      ),
+      'file' => "$large_image_module_path/includes/derivatives.inc",
+    ),
+    array(
+      'source_dsid' => 'OBJ',
+      'destination_dsid' => 'JPG',
+      'weight' => 1,
+      'function' => array(
+        'islandora_large_image_create_jpg_derivative',
+      ),
+      'file' => "$large_image_module_path/includes/derivatives.inc",
+    ),
+    array(
+      'source_dsid' => 'OBJ',
+      'destination_dsid' => 'JP2',
+      'weight' => 2,
+      'function' => array(
+        'islandora_large_image_create_jp2_derivative',
+      ),
+      'file' => "$large_image_module_path/includes/derivatives.inc",
+    ),
+  );
+}
