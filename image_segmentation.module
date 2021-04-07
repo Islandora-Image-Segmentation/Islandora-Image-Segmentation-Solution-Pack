@@ -154,10 +154,26 @@ function image_segmentation_form_alter(&$form, &$form_state, $form_id) {
 
     switch ($form_id) {
         case 'islandora_newspaper_batch_form':
+            break;
         case 'islandora_paged_content_upload_pdf_form':
+            $form['image_segmentation_settings'] = image_segmentation_add_generate_segments_form($form_state);
+            array_splice(
+                $form['next']['#submit'],
+                0,
+                0,
+                'image_segmentation_add_generate_extracted_segments_handler'
+            );
+            drupal_set_message(json_encode($form['next']['#submit']));
+            break;
         case 'islandora_paged_content_upload_page_form':
             $form['image_segmentation_settings'] = image_segmentation_add_generate_segments_form($form_state);
-            $form['next']['#submit'][] = 'image_segmentation_add_generate_extracted_segments_handler';
+            array_splice(
+                $form['next']['#submit'],
+                1,
+                0,
+                'image_segmentation_add_generate_extracted_segments_handler'
+            );
+            drupal_set_message(json_encode($form['next']['#submit']));
             break;
     }
 
