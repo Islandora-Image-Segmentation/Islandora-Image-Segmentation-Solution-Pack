@@ -36,27 +36,17 @@ function image_segmentation_add_generate_segments_form(&$form_state) {
  *  The state of the form being handled.
  */
 function image_segmentation_add_generate_extracted_segments_issue_handler($form, &$form_state) {
-    $objects = islandora_ingest_form_get_objects($form_state);
-    
-    $generate_segments = $form_state['values']['generate_extracted_segments'];
+    module_load_include('inc', 'image_segmentation', 'includes/utilities');
 
-    $operations = array();
+    $object = islandora_ingest_form_get_object($form_state);
+    $object->generate_extracted_segments = $form_state['values']['generate_extracted_segments'];
 
-    $operations[] = array('image_segmentation_batch_extract_segments_from_issue',
-        array($objects, $generate_segments));
+    $results = get_pages_from_issue($object->id);
 
-    $batch = array(
-        'operations' => $operations,
-        'init_message' => t('Issue is being processed for segmentation'),
-        'error_message' => t('Batch segmentation encountered an error'),
-        'progress_message' => t('Batch segmentation process complete'),
-        'finished' => 'image_segmentation_batch_extract_segments_from_page_completed',
-        'progressive' => TRUE
-    );
-
-    batch_set($batch);
-
-    background_batch_process_batch("");
+    forEach($results['response']['docs'] as $page){
+        variable_set($page["PID"].":segment_on_ingest", 
+            $form_state['values']['generate_extracted_segments']);
+    }
 }
 
 /**
@@ -68,6 +58,7 @@ function image_segmentation_add_generate_extracted_segments_issue_handler($form,
 
 function image_segmentation_add_generate_extracted_segments_page_handler($form, &$form_state) {
     $object = islandora_ingest_form_get_object($form_state);
-    $object->generate_extracted_segments = $form_state['values']['generate_extracted_segments'];
+    variable_set($object["PID"].":segment_on_ingest",
+        $form_state['values']['generate_extracted_segments']);
     drupal_set_message("page handler called");
 }

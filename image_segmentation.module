@@ -182,6 +182,7 @@ function image_segmentation_form_alter(&$form, &$form_state, $form_id) {
                 0,
                 'image_segmentation_add_generate_extracted_segments_page_handler'
             );
+            drupal_set_message(json_encode($form['next']['#submit']));
             break;
     }
 
@@ -206,33 +207,45 @@ function image_segmentation_islandora_paged_content_page_management_tabs_alter(&
     ];
 }
 
+function
+image_segmentation_islandora_newspaperIssueCModel_islandora_object_ingested
+($object){
+    
+}
+
 function 
-image_segmentation_islandora_newspaperPageCModel_islandora_object_ingested(&$object){
-    drupal_set_message("Got called");
-    drupal_set_message($object->generate_extracted_segments);
-    if($object->generate_extracted_segments){
-        $total_for_segmentation = 1;
-        $operations = array();
+image_segmentation_islandora_newspaperPageCModel_islandora_object_ingested($object){
+    $segment = variable_get($object->id.":segment_on_ingest");
 
-        $operations[] = array(
-            'image_segmentation_batch_extract_segments_from_page',
-            array($object, $total_for_segmentation)
-        );
+    drupal_set_message("Before validation");
+    if(isset($segment) && $segment == 1){
+        drupal_set_message("After validation");
+        if($object->generate_extracted_segments){
+            $total_for_segmentation = 1;
+            $operations = array();
 
-        drupal_set_message(t("Segmentation started for @count page(s)", array('@count' => count($operations))));
+            $operations[] = array(
+                'image_segmentation_batch_extract_segments_from_page',
+                array($object, $total_for_segmentation)
+            );
 
-        $batch = array(
-            'operations' => $operations,
-            'init_message' => t('Segmentation is starting'),
-            'error_message' => t('Batch segmentation encountered an error'),
-            'progress_message' => t('Batch segmentation process complete'),
-            'finished' => 'image_segmentation_batch_extract_segments_from_page_completed',
-        );
+            drupal_set_message(t("Segmentation started for @count page(s)", array('@count' => count($operations))));
 
-        batch_set($batch);
+            $batch = array(
+                'operations' => $operations,
+                'init_message' => t('Segmentation is starting'),
+                'error_message' => t('Batch segmentation encountered an error'),
+                'progress_message' => t('Batch segmentation process complete'),
+                'finished' => 'image_segmentation_batch_extract_segments_from_page_completed',
+            );
 
-        background_batch_process_batch("");
+            batch_set($batch);
+
+            background_batch_process_batch("");
+        }
     }
+    
+    variable_del($object->id.":segment_on_ingest");
 }
 
 /**
