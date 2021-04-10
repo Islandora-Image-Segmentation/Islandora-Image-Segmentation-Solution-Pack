@@ -30,6 +30,12 @@ The configuration page allows you to set the following parameters:
 3. API Key: The API key that your API is using. Can be left blank if the API was not launched with a key.
 4. Confidence Threshold: A number between 0 and 1. All returned segments below this threshold will not be ingested.
 
+If installing via vagrant, batch_process and composer_manager should be enabled automatically otherwise, you can enable both using the UI or:
+
+1. Navigate to your drupal root folder in terminal (normally '/var/www/drupal')
+2. Run `drush en -u 1 -y composer_manager`
+3. Run `drush en -u 1 -y background_batch`
+
 ## Per-page Segmentation
 You can manually segment individual pages. 
 Navigate to a newspaper page >> Manage >> Page >> Generate Segments.

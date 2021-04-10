@@ -345,3 +345,76 @@ function image_segmentation_batch_extract_segments_from_page_completed($success,
         );
     }
 }
+
+/**
+ * Implements hook_cmodel_pid_islandora_derivative().
+ */
+function image_segmentation_islandora_segmentedImageCModel_islandora_derivative(AbstractObject $object = NULL, array $ds_modified_params = array()) {
+  $large_image_module_path = drupal_get_path('module', 'islandora_large_image');
+  $image_segmentation_module_path = drupal_get_path('module', 'image_segmentation');
+
+  //If OBJ datastream is of an image type
+  if (isset($object['OBJ']) && strpos(strtolower($object['OBJ']->mimetype), 'image') === 0 ) {
+    if (strtolower($object['OBJ']->mimetype) == 'image/jp2'){
+      return [
+        [
+          'source_dsid' => 'OBJ',
+          'destination_dsid' => 'TN',
+          'weight' => 0,
+          'function' => [
+            'image_segmentation_create_tn_jp2_derivative',
+          ],
+          'file' => "$image_segmentation_module_path/includes/derivatives.inc",
+        ],
+        [
+          'source_dsid' => 'OBJ',
+          'destination_dsid' => 'JPG',
+          'weight' => 1,
+          'function' => [
+            'image_segmentation_create_jpg_jp2_derivative',
+          ],
+          'file' => "$image_segmentation_module_path/includes/derivatives.inc",
+        ],
+        [
+          'source_dsid' => 'OBJ',
+          'destination_dsid' => 'JP2',
+          'weight' => 2,
+          'function' => [
+            'image_segmentation_create_jp2_jp2_derivative',
+          ],
+          'file' => "$image_segmentation_module_path/includes/derivatives.inc",
+        ],
+      ];
+    }
+    return [
+      [
+        'source_dsid' => 'OBJ',
+        'destination_dsid' => 'TN',
+        'weight' => 0,
+        'function' => [
+          'islandora_large_image_create_tn_derivative',
+        ],
+        'file' => "$large_image_module_path/includes/derivatives.inc",
+      ],
+      [
+        'source_dsid' => 'OBJ',
+        'destination_dsid' => 'JPG',
+        'weight' => 1,
+        'function' => [
+          'islandora_large_image_create_jpg_derivative',
+        ],
+        'file' => "$large_image_module_path/includes/derivatives.inc",
+      ],
+      [
+        'source_dsid' => 'OBJ',
+        'destination_dsid' => 'JP2',
+        'weight' => 2,
+        'function' => [
+          'islandora_large_image_create_jp2_derivative',
+        ],
+        'file' => "$large_image_module_path/includes/derivatives.inc",
+      ],
+    ];
+  }
+  return [];
+}
