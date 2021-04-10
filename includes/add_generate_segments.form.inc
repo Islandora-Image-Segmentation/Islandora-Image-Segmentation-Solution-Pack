@@ -28,68 +28,70 @@ function image_segmentation_add_generate_segments_form(&$form_state) {
 }
 
 /**
- * Handles ingest forms with image segmentation settings added.
+ * Handles newspaper issue ingest form segmentation.
  *
  * @param $form
  *  The form being handled.
  * @param $form_state
  *  The state of the form being handled.
  */
-function image_segmentation_add_generate_extracted_segments_handler($form, &$form_state) {
-    module_load_include('inc', 'image_segmentation', 'includes/utilities');
-    
-    drupal_set_message("Here");
+function image_segmentation_add_generate_extracted_segments_issue_handler($form, &$form_state) {
     $objects = islandora_ingest_form_get_objects($form_state);
-    $generate_segments = $form_state['values']['generate_extracted_segments'];
-    drupal_set_message($generate_segments);
-    drupal_set_message("Something");
     
-    if(isset($objects) && !empty($objects) && $objects != null && 
-        $generate_segments == 1){
-        $total_for_segmentation = count($objects);
+    $generate_segments = $form_state['values']['generate_extracted_segments'];
+
+    $operations = array();
+
+    $operations[] = array('image_segmentation_batch_extract_segments_from_issue',
+        array($objects, $generate_segments));
+
+    $batch = array(
+        'operations' => $operations,
+        'init_message' => t('Issue is being processed for segmentation'),
+        'error_message' => t('Batch segmentation encountered an error'),
+        'progress_message' => t('Batch segmentation process complete'),
+        'finished' => 'image_segmentation_batch_extract_segments_from_page_completed',
+        'progressive' => TRUE
+    );
+
+    batch_set($batch);
+
+    background_batch_process_batch("");
+}
+
+/**
+ * Handles newspaper page ingest form segmentation.
+ *
+ * @param $form
+ * @param $form_state
+ */
+
+function image_segmentation_add_generate_extracted_segments_page_handler($form, &$form_state) {
+    $generate_segments = $form_state['values']['generate_extracted_segments'];
+
+    $object = islandora_ingest_form_get_object($form_state);
+    
+    if(isset($object) && $generate_segments == 1){
+        $total_for_segmentation = 1;
         $operations = array();
-        $page_number = 0;
 
-        foreach($objects as $pageInfo){
-            $issue_pid = $pageInfo->id;
-            drupal_set_message($issue_pid);
+        $operations[] = array(
+            'image_segmentation_batch_extract_segments_from_page_with_delay',
+            array($object, $total_for_segmentation)
+        );
 
-            $split_issue_pid = explode(":", $issue_pid);
-            $formatted_issue_pid = $split_issue_pid[0] . "\:" . 
-                $split_issue_pid[1];
+        drupal_set_message(t("Segmentation started for @count page(s)", array('@count' => count($operations))));
 
-            //Get associated pages from solr
-            $url = "http://localhost:8080/solr/collection1/select?q=*:*&wt=json";
-            $data = file_get_contents($url
-                . "&fq=RELS_EXT_hasModel_uri_s:info\:fedora\/islandora\:newspaperPageCModel"
-                . "&fq=RELS_EXT_isPageOf_uri_s:info\:fedora\/".$formatted_issue_pid 
-                . "&start=0");
+        $batch = array(
+            'operations' => $operations,
+            'init_message' => t('Segmentation is starting'),
+            'error_message' => t('Batch segmentation encountered an error'),
+            'progress_message' => t('Batch segmentation process complete'),
+            'finished' => 'image_segmentation_batch_extract_segments_from_page_completed',
+        );
 
-            if (isset($data)) {
-                $results = json_decode($data, TRUE);
+        batch_set($batch);
 
-                forEach($results['response']['docs'] as $doc){
-                    $page_number++;
-                    if(image_segmentation_can_segment($doc["PID"])){
-                        $operations[] = array('image_segmentation_batch_extract_segments_from_page',
-                            array($issue_pid, $total_for_segmentation, $page_number));
-                    }
-                }
-            }
-        }
-
-        if(!empty($operations)){
-            $batch = array(
-                'operations' => $operations,
-                'init_message' => t('Segmentation is starting'),
-                'error_message' => t('Batch segmentation encountered an error'),
-                'progress_message' => t('Batch segmentation process complete'),
-                'finished' => 'image_segmentation_batch_extract_segments_from_page_completed',
-            );
-
-            batch_set($batch);
-
-            background_batch_process_batch("");
-        }
+        background_batch_process_batch("");
     }
 }
