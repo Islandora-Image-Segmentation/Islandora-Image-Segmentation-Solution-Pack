@@ -67,31 +67,7 @@ function image_segmentation_add_generate_extracted_segments_issue_handler($form,
  */
 
 function image_segmentation_add_generate_extracted_segments_page_handler($form, &$form_state) {
-    $generate_segments = $form_state['values']['generate_extracted_segments'];
-
     $object = islandora_ingest_form_get_object($form_state);
-    
-    if(isset($object) && $generate_segments == 1){
-        $total_for_segmentation = 1;
-        $operations = array();
-
-        $operations[] = array(
-            'image_segmentation_batch_extract_segments_from_page_with_delay',
-            array($object, $total_for_segmentation)
-        );
-
-        drupal_set_message(t("Segmentation started for @count page(s)", array('@count' => count($operations))));
-
-        $batch = array(
-            'operations' => $operations,
-            'init_message' => t('Segmentation is starting'),
-            'error_message' => t('Batch segmentation encountered an error'),
-            'progress_message' => t('Batch segmentation process complete'),
-            'finished' => 'image_segmentation_batch_extract_segments_from_page_completed',
-        );
-
-        batch_set($batch);
-
-        background_batch_process_batch("");
-    }
+    $object->generate_extracted_segments = $form_state['values']['generate_extracted_segments'];
+    drupal_set_message("page handler called");
 }

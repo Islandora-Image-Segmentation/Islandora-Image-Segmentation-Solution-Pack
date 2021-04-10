@@ -206,6 +206,35 @@ function image_segmentation_islandora_paged_content_page_management_tabs_alter(&
     ];
 }
 
+function 
+image_segmentation_islandora_newspaperPageCModel_islandora_object_ingested(&$object){
+    drupal_set_message("Got called");
+    drupal_set_message($object->generate_extracted_segments);
+    if($object->generate_extracted_segments){
+        $total_for_segmentation = 1;
+        $operations = array();
+
+        $operations[] = array(
+            'image_segmentation_batch_extract_segments_from_page',
+            array($object, $total_for_segmentation)
+        );
+
+        drupal_set_message(t("Segmentation started for @count page(s)", array('@count' => count($operations))));
+
+        $batch = array(
+            'operations' => $operations,
+            'init_message' => t('Segmentation is starting'),
+            'error_message' => t('Batch segmentation encountered an error'),
+            'progress_message' => t('Batch segmentation process complete'),
+            'finished' => 'image_segmentation_batch_extract_segments_from_page_completed',
+        );
+
+        batch_set($batch);
+
+        background_batch_process_batch("");
+    }
+}
+
 /**
  * Implements drupal batch api to extract segments from an issue
  *
@@ -286,25 +315,6 @@ function image_segmentation_batch_extract_segments_from_page($page, $total_pages
 
     if (count($context['results']) == $total_pages) {
         $context['finished'] = count($context['results']) / $total_pages;
-    }
-}
-
-/**
- * Add a delay before segmentation to allow for page ingestion
- *
- * @param $object
- * @param $total_pages
- * @param $context
- */
-function image_segmentation_batch_extract_segments_from_page_with_delay($object, $total_pages, &$context) {
-    module_load_include('inc', 'image_segmentation', 'includes/utilities');
-    
-    sleep(300);
-
-    $page = islandora_object_load($object->id);
-    drupal_set_message(json_encode($page));
-    if(image_segmentation_can_segment($page)){
-        image_segmentation_batch_extract_segments_from_page($page, $total_pages, $context);
     }
 }
 
