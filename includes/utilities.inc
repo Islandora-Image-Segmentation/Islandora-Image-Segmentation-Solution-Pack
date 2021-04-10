@@ -240,7 +240,8 @@ function image_segmentation_get_newspaper_pages_from_solr($page, $solr_query) {
 
         $start = $page * 10 - 10;
         $url = "http://localhost:8080/solr/collection1/select?q=" . $solr_query . "&wt=json";
-        $data = file_get_contents($url . "&fq=RELS_EXT_hasModel_uri_s:info\:fedora\/islandora\:newspaperPageCModel" . "&start=" . $start);
+        $data = file_get_contents(
+            $url . "&fq=RELS_EXT_hasModel_uri_s:info\:fedora\/islandora\:newspaperPageCModel" . "&start=" . $start);
 
         if (isset($data)) {
             $results = json_decode($data, TRUE);

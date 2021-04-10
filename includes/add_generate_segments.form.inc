@@ -37,9 +37,7 @@ function image_segmentation_add_generate_segments_form(&$form_state) {
  */
 function image_segmentation_add_generate_extracted_segments_issue_handler($form, &$form_state) {
     module_load_include('inc', 'image_segmentation', 'includes/utilities');
-
     $object = islandora_ingest_form_get_object($form_state);
-    $object->generate_extracted_segments = $form_state['values']['generate_extracted_segments'];
 
     $results = get_pages_from_issue($object->id);
 
@@ -58,7 +56,6 @@ function image_segmentation_add_generate_extracted_segments_issue_handler($form,
 
 function image_segmentation_add_generate_extracted_segments_page_handler($form, &$form_state) {
     $object = islandora_ingest_form_get_object($form_state);
-    variable_set($object["PID"].":segment_on_ingest",
+    variable_set($object->id.":segment_on_ingest",
         $form_state['values']['generate_extracted_segments']);
-    drupal_set_message("page handler called");
 }
