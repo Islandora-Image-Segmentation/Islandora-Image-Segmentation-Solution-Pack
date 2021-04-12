@@ -227,6 +227,15 @@ function image_segmentation_ingest_segment(ExtractedSegment &$extractedSegment, 
     return $repository->ingestObject($segment);
 }
 
+/**
+ * return newspaper query results
+ * 
+ * @param $page - current manual segmentation page number
+ * @param $solr_query - solr newspaper query
+ *
+ * @return array - solr query results
+ */
+
 function image_segmentation_get_newspaper_pages_from_solr($page, $solr_query) {
 
     $num_of_pages = 0;
