@@ -302,6 +302,35 @@ function image_segmentation_crop_jp2(AbstractDatastream &$source, AbstractDatast
 
 }
 
+
+function image_segmentation_scale_jp2(AbstractDatastream &$datastream, int $level){
+  $client = new Client(
+    ['base_uri' => variable_get('djatoka_base_uri','http://localhost:8080/adore-djatoka/')]
+  );
+  $url = url("islandora/object/{$datastream->parent->id}/datastream/{$datastream->id}/view",
+    [
+      'absolute' => TRUE,
+      //      'query' => array(
+      //        'token' => $token,
+      //      ),
+      'language' => language_default(),
+      'https' => FALSE,
+    ]
+  );
+
+  $query = [
+    'url_ver' => 'Z39.88-2004',
+    'rft_id' => $url,
+    'svc_id' => 'info:lanl-repo/svc/getRegion',
+    'svc_val_fmt' => 'info:ofi/fmt:kev:mtx:jpeg2000',
+    'svc.format' => 'image/jpeg',
+      'svc.level' => $level,
+  ];
+
+  $response = $client->get('resolver', ['query' => $query]);
+  return $response->getBody();
+}
+
 /**
  * Hits a dummy endpoint in the API to see if it is accessible.
  *

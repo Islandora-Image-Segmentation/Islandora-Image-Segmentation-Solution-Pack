@@ -43,7 +43,7 @@
       "image_segmentation_timeout" => array(
         '#type' => 'textfield',
         '#title' => t('API Timeout'),
-        '#default_value' => variable_get('image_segmentation_timeout', '60.0'),
+        '#default_value' => variable_get('image_segmentation_timeout', '360.0'),
         '#description' => t('How long to wait for a response in seconds.'),
         '#size' => 50,
       )
