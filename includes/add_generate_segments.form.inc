@@ -37,15 +37,10 @@ function image_segmentation_add_generate_segments_form(&$form_state) {
  */
 function image_segmentation_add_generate_extracted_segments_handler($form, &$form_state) {
     module_load_include('inc', 'image_segmentation', 'includes/utilities');
-    
-    drupal_set_message("Here");
     $objects = islandora_ingest_form_get_objects($form_state);
     $generate_segments = $form_state['values']['generate_extracted_segments'];
-    drupal_set_message($generate_segments);
-    drupal_set_message("Something");
     
-    if(isset($objects) && !empty($objects) && $objects != null && 
-        $generate_segments == 1){
+    if(isset($objects) && !empty($objects) && $objects != null && $generate_segments == 1){
         $total_for_segmentation = count($objects);
         $operations = array();
         $page_number = 0;
