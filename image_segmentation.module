@@ -35,6 +35,13 @@ function image_segmentation_menu() {
       'file' => 'includes/manual_article_segmentation.form.inc',
       'type' => MENU_NORMAL_ITEM,
     ],
+    'image_segmentation/segments' => [
+      'title' => 'Segment list ajax callback',
+      'type' => MENU_CALLBACK,
+      'file' => 'includes/segment_list.inc',
+      'page callback' => 'segment_list_callback',
+      'access arguments' => array('access content'),
+    ]
   ];
 }
 
@@ -52,12 +59,6 @@ function image_segmentation_theme($existing, $type, $theme, $path) {
         'image_segmentation_manual_segmentation_results' => [
             'file' => 'theme/theme.inc',
             'template' => 'theme/image-segmentation-manual-segmentation-results',
-            'variables' => ['object' => NULL],
-        ],
-        'image_segmentation_segment_list' => [
-            'file' => 'theme/theme.inc',
-            'template' => 'theme/image-segmentation-segment-list',
-            'pattern' => 'image_segmentation_list__',
             'variables' => ['object' => NULL],
         ],
     ];
@@ -131,16 +132,16 @@ function image_segmentation_block_info() {
  * Implements hook_block_view().
  */
 function image_segmentation_block_view($delta = '') {
-    $block = [];
+  $block = [];
     switch ($delta) {
         case 'image_segment_list':
+            module_load_include('inc', 'image_segmentation', 'includes/segment_list');
             $object = menu_get_object('islandora_object', 2);
             if (!isset($object) || !array_intersect($object->models, ['islandora:newspaperPageCModel'])) {
                 break;
             }
             $block['subject'] = t('Image Segments');
-            $block['content'] = theme('image_segmentation_segment_list', ['object' => $object]);
-
+            $block['content'] = segment_list_array($object);
     }
     return $block;
 }
