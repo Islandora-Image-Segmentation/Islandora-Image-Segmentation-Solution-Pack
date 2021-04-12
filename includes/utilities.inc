@@ -240,7 +240,8 @@ function image_segmentation_get_newspaper_pages_from_solr($page, $solr_query) {
 
         $start = $page * 10 - 10;
         $url = "http://localhost:8080/solr/collection1/select?q=" . $solr_query . "&wt=json";
-        $data = file_get_contents($url . "&fq=RELS_EXT_hasModel_uri_s:info\:fedora\/islandora\:newspaperPageCModel" . "&start=" . $start);
+        $data = file_get_contents(
+            $url . "&fq=RELS_EXT_hasModel_uri_s:info\:fedora\/islandora\:newspaperPageCModel" . "&start=" . $start);
 
         if (isset($data)) {
             $results = json_decode($data, TRUE);
@@ -343,4 +344,27 @@ function check_api_connection() {
     drupal_set_message("Error connecting to API: " . $e, "error");
     return False;
   }
+}
+
+function get_pages_from_issue($issue_pid){
+    $split_issue_pid = explode(":", $issue_pid);
+    $formatted_issue_pid = $split_issue_pid[0] . "\:" .
+        $split_issue_pid[1];
+    
+    //Get associated pages from solr
+    $url = "http://localhost:8080/solr/collection1/select?q=*:*&wt=json";
+    $data = file_get_contents($url
+        . "&fq=RELS_EXT_hasModel_uri_s:info\:fedora\/islandora\:newspaperPageCModel"
+        . "&fq=RELS_EXT_isPageOf_uri_s:info\:fedora\/".$formatted_issue_pid
+        . "&start=0&rows=100");
+
+    if(isset($data)){
+        $results = json_decode($data, TRUE);
+
+        if(!empty($results)){
+            return $results;
+        }
+    }
+    
+    return NULL;
 }
