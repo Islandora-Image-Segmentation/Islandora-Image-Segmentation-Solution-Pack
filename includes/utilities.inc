@@ -234,6 +234,15 @@ function image_segmentation_ingest_segment(ExtractedSegment &$extractedSegment, 
     return $repository->ingestObject($segment);
 }
 
+/**
+ * return newspaper query results
+ * 
+ * @param $page - current manual segmentation page number
+ * @param $solr_query - solr newspaper query
+ *
+ * @return array - solr query results
+ */
+
 function image_segmentation_get_newspaper_pages_from_solr($page, $solr_query) {
 
     $num_of_pages = 0;
@@ -247,7 +256,8 @@ function image_segmentation_get_newspaper_pages_from_solr($page, $solr_query) {
 
         $start = $page * 10 - 10;
         $url = "http://localhost:8080/solr/collection1/select?q=" . $solr_query . "&wt=json";
-        $data = file_get_contents($url . "&fq=RELS_EXT_hasModel_uri_s:info\:fedora\/islandora\:newspaperPageCModel" . "&start=" . $start);
+        $data = file_get_contents(
+            $url . "&fq=RELS_EXT_hasModel_uri_s:info\:fedora\/islandora\:newspaperPageCModel" . "&start=" . $start);
 
         if (isset($data)) {
             $results = json_decode($data, TRUE);
@@ -300,6 +310,35 @@ function image_segmentation_crop_jp2(AbstractDatastream &$source, AbstractDatast
 
 }
 
+
+function image_segmentation_scale_jp2(AbstractDatastream &$datastream, int $level){
+  $client = new Client(
+    ['base_uri' => variable_get('djatoka_base_uri','http://localhost:8080/adore-djatoka/')]
+  );
+  $url = url("islandora/object/{$datastream->parent->id}/datastream/{$datastream->id}/view",
+    [
+      'absolute' => TRUE,
+      //      'query' => array(
+      //        'token' => $token,
+      //      ),
+      'language' => language_default(),
+      'https' => FALSE,
+    ]
+  );
+
+  $query = [
+    'url_ver' => 'Z39.88-2004',
+    'rft_id' => $url,
+    'svc_id' => 'info:lanl-repo/svc/getRegion',
+    'svc_val_fmt' => 'info:ofi/fmt:kev:mtx:jpeg2000',
+    'svc.format' => 'image/jpeg',
+      'svc.level' => $level,
+  ];
+
+  $response = $client->get('resolver', ['query' => $query]);
+  return $response->getBody();
+}
+
 /**
  * Hits a dummy endpoint in the API to see if it is accessible.
  *
@@ -321,4 +360,27 @@ function check_api_connection() {
     drupal_set_message("Error connecting to API: " . $e, "error");
     return False;
   }
+}
+
+function get_pages_from_issue($issue_pid){
+    $split_issue_pid = explode(":", $issue_pid);
+    $formatted_issue_pid = $split_issue_pid[0] . "\:" .
+        $split_issue_pid[1];
+    
+    //Get associated pages from solr
+    $url = "http://localhost:8080/solr/collection1/select?q=*:*&wt=json";
+    $data = file_get_contents($url
+        . "&fq=RELS_EXT_hasModel_uri_s:info\:fedora\/islandora\:newspaperPageCModel"
+        . "&fq=RELS_EXT_isPageOf_uri_s:info\:fedora\/".$formatted_issue_pid
+        . "&start=0&rows=100");
+
+    if(isset($data)){
+        $results = json_decode($data, TRUE);
+
+        if(!empty($results)){
+            return $results;
+        }
+    }
+    
+    return NULL;
 }

@@ -14,6 +14,10 @@
     ?>
     
     <table>
+        <div class="manual_segmentation_options">
+            <label>Select all:&nbsp;&nbsp;</label>
+            <input id="manual_segmentation_select_all" type="checkbox" onclick="select_all_checkboxes()"/>
+        </div>
         <thead>
             <tr>
                 <td>PID</td>
@@ -62,7 +66,15 @@
                 print "<td><strong>Title:</strong> {$value['dc.title'][0]}</td>";
                 print "<td><strong>MIMETYPE:</strong> {$value['fedora_datastream_version_OBJ_MIMETYPE_mt'][0]}</td>";
                 print "<td><strong>Segmented:</strong> {$is_segmented}</td>";
-                print "<td><strong>Choose for segmentation:</strong> <input onclick=\"updated_checkboxes()\" checked type=\"checkbox\" class=\"manual_segmentation_checkboxes\" value=\"{$value['PID']}\" name=\"{$value['PID']}\"></td>";
+                
+                if(empty($segments) == TRUE){
+                    print "<td><strong>Choose for segmentation:</strong> <input onclick=\"updated_checkboxes()\" 
+checked type=\"checkbox\" class=\"manual_segmentation_checkboxes\" value=\"{$value['PID']}\" name=\"{$value['PID']}\"></td>";
+                }else{
+                    print "<td><strong>Choose for segmentation:</strong> <input onclick=\"updated_checkboxes()\" 
+type=\"checkbox\" class=\"manual_segmentation_checkboxes\" value=\"{$value['PID']}\" name=\"{$value['PID']}\"></td>";
+                }
+                
                 print "</tr>";
             }
         }

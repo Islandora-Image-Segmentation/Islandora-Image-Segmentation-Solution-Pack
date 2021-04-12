@@ -72,13 +72,20 @@ function manual_article_segmentation_batch_segmentation() {
     $query_results = json_decode($_COOKIE["manual_segmentation_updated_checkboxes"], TRUE);
     $total_for_segmentation = 0;
     $operations = array();
+    $page_number = 0;
 
     foreach($query_results as $pageInfo){
         if($pageInfo["checked"] == TRUE){
             $total_for_segmentation++;
+        }
+    }
+
+    foreach($query_results as $pageInfo){
+        if($pageInfo["checked"] == TRUE){
+            $page_number++;
             $page = islandora_object_load($pageInfo["pid"]);
             if(image_segmentation_can_segment($page)){
-                $operations[] = array('image_segmentation_batch_extract_segments_from_page', array($page, $total_for_segmentation));
+                $operations[] = array('image_segmentation_batch_extract_segments_from_page', array($page, $total_for_segmentation, $page_number));
             }
         }
     }
