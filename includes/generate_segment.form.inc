@@ -104,11 +104,29 @@ function image_segmentation_generate_segment_issues_form(array $form, array &$fo
  */
 function image_segmentation_generate_segment_issues_form_submit(array $form, array &$form_state) {
   module_load_include('inc', 'image_segmentation', 'includes/utilities');
-  $object = islandora_object_load($form_state['values']['pid']);
-  if (image_segmentation_extract_segments($object, $form_state['values']['force'])) {
-    drupal_set_message(t('Successfully extracted segments.'));
-  }
-  else {
-    drupal_set_message(t('Failed to extracted segments.'), 'error');
+  drupal_set_message("Creating background tasks for pages ...");
+  $pages = get_pages_from_issue($form_state['values']['pid']);
+  forEach($pages['response']['docs'] as $page){
+    $total_for_segmentation = 1;
+    $operations = array();
+
+    $operations[] = array(
+      'image_segmentation_batch_extract_segments_from_page',
+      array($page, $total_for_segmentation)
+    );
+
+    drupal_set_message(t("Segmentation started for @count page(s)", array('@count' => count($operations))));
+
+    $batch = array(
+      'operations' => $operations,
+      'init_message' => t('Segmentation is starting'),
+      'error_message' => t('Batch segmentation encountered an error'),
+      'progress_message' => t('Batch segmentation process complete'),
+      'finished' => 'image_segmentation_batch_extract_segments_from_page_completed',
+    );
+
+    batch_set($batch);
+
+    background_batch_process_batch("");
   }
 }
