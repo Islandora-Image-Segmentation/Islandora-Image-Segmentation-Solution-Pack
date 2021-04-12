@@ -19,3 +19,13 @@
   color: black;
 }
 
+.manual_segmentation_options {
+  padding-bottom: 10px;
+  width: 100%;
+  text-align: right;
+}
+
+.manual_segmentation_options label{
+  display: inline-block;
+}
+
