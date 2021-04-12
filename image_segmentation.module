@@ -1,0 +1,298 @@
+<?php
+
+/**
+ * @file
+ * Image segmentation module
+ */
+
+/**
+ * Implements hook_menu().
+ * Drupal menus allow urls to be used as function calls, giving Drupal gets
+ * much
+ * of its power and flexibility.
+ * See
+ * https://api.drupal.org/api/drupal/modules!system!system.api.php/function/hook_menu/7
+ */
+
+function image_segmentation_menu() {
+
+  return [
+    'admin/islandora/solution_pack_config/image_segmentation' => [
+      'title' => 'Image Segmentation Module',
+      'description' => 'Configure the Image Segmentation solution pack.',
+      'page callback' => 'drupal_get_form',
+      'access arguments' => ['administer site configuration'],
+      'page arguments' => ['image_segmentation_admin_form'],
+      'file' => 'includes/admin.form.inc',
+      'type' => MENU_NORMAL_ITEM,
+    ],
+    'admin/islandora/manual_article_segmentation' => [
+      'title' => t('Manual Article Segmentation'),
+      'page callback' => 'drupal_get_form',
+      'access arguments' => ['administer site configuration'],
+      'page arguments' => ['manual_article_segmentation_form'],
+      'description' => t('An Islandora page with a text field for submitting SOLR queries to select which articles get manually segmented'),
+      'file' => 'includes/manual_article_segmentation.form.inc',
+      'type' => MENU_NORMAL_ITEM,
+    ],
+  ];
+}
+
+/**
+ * Implements hook_theme().
+ */
+function image_segmentation_theme($existing, $type, $theme, $path) {
+    return [
+        'image_segmentation_segment' => [
+            'file' => 'theme/theme.inc',
+            'template' => 'theme/image-segmentation-segment',
+            'pattern' => 'image_segmentation__',
+            'variables' => ['object' => NULL],
+        ],
+        'image_segmentation_manual_segmentation_results' => [
+            'file' => 'theme/theme.inc',
+            'template' => 'theme/image-segmentation-manual-segmentation-results',
+            'variables' => ['object' => NULL],
+        ],
+        'image_segmentation_segment_list' => [
+            'file' => 'theme/theme.inc',
+            'template' => 'theme/image-segmentation-segment-list',
+            'pattern' => 'image_segmentation_list__',
+            'variables' => ['object' => NULL],
+        ],
+    ];
+}
+
+/**
+ * Implements hook_cmodel_pid_islandora_ingest_steps().
+ */
+function image_segmentation_islandora_segmentedImageCModel_islandora_ingest_steps(array $form_state) {
+    return [
+        'image_segmentation_upload_segment' => [
+            'weight' => 10,
+            'type' => 'form',
+            'form_id' => 'image_segmentation_upload_segment_form',
+            'module' => 'image_segmentation',
+            'file' => 'includes/upload_segment.form.inc',
+        ],
+    ];
+}
+
+/**
+ * Implements hook_islandora_view_object().
+ */
+function image_segmentation_islandora_segmentedImageCModel_islandora_view_object(AbstractObject $object, $user, $page_number) {
+    $output = theme('image_segmentation_segment', ['object' => $object]);
+    return ['' => $output];
+}
+
+/**
+ * Implements hook_islandora_required_objects().
+ */
+function image_segmentation_islandora_required_objects(IslandoraTuque $connection) {
+    $module_path = drupal_get_path('module', 'image_segmentation');
+    // Image segmentation content model
+    $content_model = $connection->repository->constructObject('islandora:segmentedImageCModel');
+    $content_model->owner = 'fedoraAdmin';
+    $content_model->label = 'Segmented Image Model';
+    $content_model->models = 'fedora-system:ContentModel-3.0';
+
+    // DS-COMPOSITE-MODEL datastream
+    $datastream = $content_model->constructDatastream('DS-COMPOSITE-MODEL', 'X');
+    $datastream->label = 'DS-COMPOSITE-MODEL';
+    $datastream->mimetype = 'application/xml';
+    $datastream->setContentFromFile("$module_path/xml/content_models/image_segmentation_ds_composite_model.xml", FALSE);
+    $content_model->ingestDatastream($datastream);
+
+    return [
+        'image_segmentation' => [
+            'title' => 'Image Segmentation',
+            'objects' => [
+                $content_model,
+            ],
+        ],
+    ];
+}
+
+/**
+ * Implements hook_block_info().
+ */
+function image_segmentation_block_info() {
+    $blocks = [
+        'image_segment_list' => [
+            'info' => t('Image Segment List'),
+            'cache' => DRUPAL_NO_CACHE,
+        ],
+    ];
+    return $blocks;
+}
+
+/**
+ * Implements hook_block_view().
+ */
+function image_segmentation_block_view($delta = '') {
+    $block = [];
+    switch ($delta) {
+        case 'image_segment_list':
+            $object = menu_get_object('islandora_object', 2);
+            if (!isset($object) || !array_intersect($object->models, ['islandora:newspaperPageCModel'])) {
+                break;
+            }
+            $block['subject'] = t('Image Segments');
+            $block['content'] = theme('image_segmentation_segment_list', ['object' => $object]);
+
+    }
+    return $block;
+}
+
+/**
+ * Alter newspaper ingest forms
+ */
+
+function image_segmentation_form_alter(&$form, &$form_state, $form_id) {
+  form_load_include($form_state,'inc', 'image_segmentation', 'includes/add_generate_segments.form');
+
+  switch ($form_id)  {
+    case 'islandora_newspaper_batch_form':
+    case 'islandora_paged_content_upload_pdf_form':
+    case 'islandora_paged_content_upload_page_form':
+      $form['image_segmentation_settings'] = image_segmentation_add_generate_segments_form($form_state);
+      array_unshift($form['next']['#submit'] ,  'image_segmentation_add_generate_extracted_segments_handler');
+    break;
+  }
+
+  return $form;
+}
+
+
+/**
+ * Implements hook_islandora_paged_content_page_management_tabs_alter().
+ */
+function image_segmentation_islandora_paged_content_page_management_tabs_alter(&$manage_tabs, $context) {
+    module_load_include('inc', 'image_segmentation', 'includes/generate_segment.form');
+    $manage_tabs['manage_page']['segments'] = [
+        '#title' => t('Generate Segments'),
+        '#type' => 'fieldset',
+        'form' => drupal_get_form('image_segmentation_generate_segment_form', $context['object']),
+        '#collapsible' => TRUE,
+        '#collapsed' => TRUE,
+    ];
+}
+
+/**
+ * Implements drupal batch api to extract segments from pages
+ *
+ * @param $page
+ * @param $total_pages
+ * @param $context
+ */
+
+function image_segmentation_batch_extract_segments_from_page($page, $total_pages, &$context){
+    module_load_include('inc', 'image_segmentation', 'includes/utilities');
+
+    if(image_segmentation_extract_segments($page, TRUE)){
+        $context['results'][] = $page;
+        $context['message'] = t('Completed page @queue_number out of @total_pages', array('@queue_number' => count($context['results']), '@total_pages' => $total_pages));
+    }
+    
+    if(count($context['results']) == $total_pages){
+        $context['finished'] = count($context['results']) / $total_pages;
+    }
+}
+
+/**
+ * Displays success or error depending on results from page extract batch work
+ *
+ * @param $success
+ * @param $results
+ * @param $operations
+ */
+
+function image_segmentation_batch_extract_segments_from_page_completed($success, $results, $operations) {
+    if ($success) {
+        drupal_set_message(t('Segmentation successful'));
+    } else {
+        // An error occurred.
+        // $operations contains the operations that remained unprocessed.
+        $error_operation = reset($operations);
+        drupal_set_message(
+            t(
+                'An error occurred while processing @operation with arguments : @args',
+                array('@operation' => $error_operation[0], '@args' => print_r($error_operation[0], TRUE))
+            )
+        );
+    }
+}
+
+/**
+ * Implements hook_cmodel_pid_islandora_derivative().
+ */
+function image_segmentation_islandora_segmentedImageCModel_islandora_derivative(AbstractObject $object = NULL, array $ds_modified_params = array()) {
+  $large_image_module_path = drupal_get_path('module', 'islandora_large_image');
+  $image_segmentation_module_path = drupal_get_path('module', 'image_segmentation');
+
+  //If OBJ datastream is of an image type
+  if (isset($object['OBJ']) && strpos(strtolower($object['OBJ']->mimetype), 'image') === 0 ) {
+    if (strtolower($object['OBJ']->mimetype) == 'image/jp2'){
+      return [
+        [
+          'source_dsid' => 'OBJ',
+          'destination_dsid' => 'TN',
+          'weight' => 0,
+          'function' => [
+            'image_segmentation_create_tn_jp2_derivative',
+          ],
+          'file' => "$image_segmentation_module_path/includes/derivatives.inc",
+        ],
+        [
+          'source_dsid' => 'OBJ',
+          'destination_dsid' => 'JPG',
+          'weight' => 1,
+          'function' => [
+            'image_segmentation_create_jpg_jp2_derivative',
+          ],
+          'file' => "$image_segmentation_module_path/includes/derivatives.inc",
+        ],
+        [
+          'source_dsid' => 'OBJ',
+          'destination_dsid' => 'JP2',
+          'weight' => 2,
+          'function' => [
+            'image_segmentation_create_jp2_jp2_derivative',
+          ],
+          'file' => "$image_segmentation_module_path/includes/derivatives.inc",
+        ],
+      ];
+    }
+    return [
+      [
+        'source_dsid' => 'OBJ',
+        'destination_dsid' => 'TN',
+        'weight' => 0,
+        'function' => [
+          'islandora_large_image_create_tn_derivative',
+        ],
+        'file' => "$large_image_module_path/includes/derivatives.inc",
+      ],
+      [
+        'source_dsid' => 'OBJ',
+        'destination_dsid' => 'JPG',
+        'weight' => 1,
+        'function' => [
+          'islandora_large_image_create_jpg_derivative',
+        ],
+        'file' => "$large_image_module_path/includes/derivatives.inc",
+      ],
+      [
+        'source_dsid' => 'OBJ',
+        'destination_dsid' => 'JP2',
+        'weight' => 2,
+        'function' => [
+          'islandora_large_image_create_jp2_derivative',
+        ],
+        'file' => "$large_image_module_path/includes/derivatives.inc",
+      ],
+    ];
+  }
+  return [];
+}
