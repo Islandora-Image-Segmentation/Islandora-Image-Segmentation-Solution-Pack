@@ -95,7 +95,7 @@ function image_segmentation_generate_segment_issues_form(array $form, array &$fo
 }
 
 /**
- * Submit handler for the generate segments form.
+ * Submit handler for the generate segments form for issues.
  *
  * @param array $form
  *   The Drupal form definition.
