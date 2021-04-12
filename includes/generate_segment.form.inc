@@ -71,7 +71,6 @@ function image_segmentation_generate_segment_form_submit(array $form, array &$fo
  */
 function image_segmentation_generate_segment_issues_form(array $form, array &$form_state, AbstractObject $object) {
   module_load_include('inc', 'image_segmentation', 'includes/utilities');
-  $can_segment = image_segmentation_can_segment($object);
   return [
     'description' => [
       '#type' => 'item',
@@ -83,7 +82,6 @@ function image_segmentation_generate_segment_issues_form(array $form, array &$fo
 
     ],
     'submit' => [
-      '#disabled' => !$can_segment,
       '#type' => 'submit',
       '#value' => t('Generate Segments'),
     ],
@@ -106,16 +104,17 @@ function image_segmentation_generate_segment_issues_form_submit(array $form, arr
   module_load_include('inc', 'image_segmentation', 'includes/utilities');
   drupal_set_message("Creating background tasks for pages ...");
   $pages = get_pages_from_issue($form_state['values']['pid']);
+
   forEach($pages['response']['docs'] as $page){
     $total_for_segmentation = 1;
     $operations = array();
 
+    $object = islandora_object_load($page['PID']);
+
     $operations[] = array(
       'image_segmentation_batch_extract_segments_from_page',
-      array($page, $total_for_segmentation)
+      array($object, $total_for_segmentation)
     );
-
-    drupal_set_message(t("Segmentation started for @count page(s)", array('@count' => count($operations))));
 
     $batch = array(
       'operations' => $operations,
