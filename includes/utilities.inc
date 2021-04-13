@@ -14,13 +14,20 @@ use GuzzleHttp\Client;
  * @return array
  *   All the segments in the given newspaper page.
  */
-function image_segmentation_get_segments(AbstractObject $object) {
+function image_segmentation_get_segments(AbstractObject $object, $type = NULL) {
 
   $repository = $object->repository;
   $get_object = function ($id) use (&$repository) {
     return $repository->getObject($id);
   };
-  return array_map($get_object, image_segmentation_get_segment_pids($object));
+  $segments = array_map($get_object, image_segmentation_get_segment_pids($object));
+  if (isset($type) && $type != 'all') {
+    $filter_type = function ($segment) use ($type) {
+      return $type == image_segmentation_get_type($segment);
+    };
+    $segments = array_filter($segments, $filter_type);
+  }
+  return $segments;
 }
 
 /**
@@ -70,13 +77,13 @@ function image_segmentation_get_type(AbstractObject $object) {
 
 function image_segmentation_get_content_types() {
   return [
-    'illustration',
-    'photograph',
-    'comics/cartoon',
-    'editorial_cartoon',
-    'map',
-    'headline',
-    'ad',
+    "Photograph",
+    "Illustration",
+    "Map",
+    "Comics/Cartoons",
+    "Editorial Cartoon",
+    "Headline",
+    "Advertisement",
   ];
 }
 
