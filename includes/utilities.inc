@@ -75,6 +75,11 @@ function image_segmentation_get_type(AbstractObject $object) {
 
 }
 
+/**
+ * @return string[]
+ *  String array of segment classes
+ */
+
 function image_segmentation_get_content_types() {
   return [
     "Photograph",
@@ -269,6 +274,17 @@ function image_segmentation_get_newspaper_pages_from_solr($page, $solr_query) {
     }
 }
 
+/**
+ * @param \AbstractDatastream $source
+ *  Source datastream
+ * @param \AbstractDatastream $dest
+ *  Desination datastream
+ * @param \NewspaperNavigator\BoundingBox $bounding_box
+ *  Crop dimensions
+ *
+ * @throws \GuzzleHttp\Exception\GuzzleException
+ */
+
 function image_segmentation_crop_jp2(AbstractDatastream &$source, AbstractDatastream &$dest, BoundingBox $bounding_box) {
   $client = new Client(
     ['base_uri' => variable_get('djatoka_base_uri','http://localhost:8080/adore-djatoka/')]
@@ -362,6 +378,14 @@ function check_api_connection() {
     return False;
   }
 }
+
+/**
+ * @param $issue_pid
+ *  PID of issue from which to extract pages
+ *
+ * @return mixed|null
+ *  List of page objects or null if no results
+ */
 
 function get_pages_from_issue($issue_pid){
     $split_issue_pid = explode(":", $issue_pid);

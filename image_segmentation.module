@@ -48,6 +48,13 @@ function image_segmentation_menu() {
 
 /**
  * Implements hook_theme().
+ *
+ * @param $existing
+ * @param $type
+ * @param $theme
+ * @param $path
+ *
+ * @return array[]
  */
 function image_segmentation_theme($existing, $type, $theme, $path) {
     return [
@@ -282,8 +289,11 @@ function image_segmentation_islandora_newspaperPageCModel_islandora_object_inges
  * Implements drupal batch api to extract segments from pages
  *
  * @param $page
+ *  Page to extracts segments from
  * @param $total_pages
+ *  Number of pages in queue
  * @param $context
+ *  Context of current batch process
  */
 
 function image_segmentation_batch_extract_segments_from_page($page, $total_pages, &$context) {
