@@ -2,6 +2,8 @@
 
 use NewspaperNavigator\SegmentationClient;
 use NewspaperNavigator\ExtractedSegment;
+use NewspaperNavigator\BoundingBox;
+use GuzzleHttp\Client;
 
 /**
  * Gets all the segments in the given newspaper page.
@@ -12,13 +14,20 @@ use NewspaperNavigator\ExtractedSegment;
  * @return array
  *   All the segments in the given newspaper page.
  */
-function image_segmentation_get_segments(AbstractObject $object) {
+function image_segmentation_get_segments(AbstractObject $object, $type = NULL) {
 
   $repository = $object->repository;
   $get_object = function ($id) use (&$repository) {
     return $repository->getObject($id);
   };
-  return array_map($get_object, image_segmentation_get_segment_pids($object));
+  $segments = array_map($get_object, image_segmentation_get_segment_pids($object));
+  if (isset($type) && $type != 'all') {
+    $filter_type = function ($segment) use ($type) {
+      return $type == image_segmentation_get_type($segment);
+    };
+    $segments = array_filter($segments, $filter_type);
+  }
+  return $segments;
 }
 
 /**
@@ -68,13 +77,13 @@ function image_segmentation_get_type(AbstractObject $object) {
 
 function image_segmentation_get_content_types() {
   return [
-    'illustration',
-    'photograph',
-    'comics/cartoon',
-    'editorial_cartoon',
-    'map',
-    'headline',
-    'ad',
+    "Photograph",
+    "Illustration",
+    "Map",
+    "Comics/Cartoons",
+    "Editorial Cartoon",
+    "Headline",
+    "Advertisement",
   ];
 }
 
@@ -117,9 +126,9 @@ function image_segmentation_extract_segments(AbstractObject $object, bool $force
     return FALSE;
   }
 
-  $api_host = variable_get("image_segmentation_api_host");
-  $api_port = variable_get("image_segmentation_api_port");
-  $api_key = variable_get("image_segmentation_api_key", 60.0);
+  $api_host = variable_get("image_segmentation_api_host", "localhost");
+  $api_port = variable_get("image_segmentation_api_port", 8008);
+  $api_key = variable_get("image_segmentation_api_key", "");
   $api_timeout = variable_get("image_segmentation_timeout", 60.0);
   $client = new SegmentationClient("{$api_host}:{$api_port}/api/", $api_timeout, $api_key);
 
@@ -190,17 +199,24 @@ function image_segmentation_ingest_segment(ExtractedSegment &$extractedSegment, 
     $segment->relationships->add(ISLANDORA_RELS_INT_URI, 'hasImageCategory', $extractedSegment->classification);
     $segment->models = ['islandora:segmentedImageCModel'];
 
-    $image = new Imagick($file);
-    $cropped = \NewspaperNavigator\cropImage($image, $extractedSegment->bounding_box);
-    $mime_detector = new MimeDetect();
-    $ext = $mime_detector->getExtension($image->getImageMimeType());
-    $cropped_file = file_create_filename("cropped.{$ext}", 'temporary://');
-    $cropped->writeImage(drupal_realpath($cropped_file));
-
     $datastream = $segment->constructDatastream('OBJ', 'M');
     $datastream->label = 'OBJ';
-    $datastream->mimetype = $cropped->getImageMimeType();
-    $datastream->setContentFromFile($cropped_file);
+    if($parent['OBJ']->mimetype == 'image/jp2'){
+         $datastream->mimetype = 'image/jp2';
+         image_segmentation_crop_jp2($parent['OBJ'],$datastream,$extractedSegment->bounding_box);
+    }
+    else{
+        $image = new Imagick($file);
+        $cropped = \NewspaperNavigator\cropImage($image, $extractedSegment->bounding_box);
+        $mime_detector = new MimeDetect();
+        $ext = $mime_detector->getExtension($image->getImageMimeType());
+        $cropped_file = file_create_filename("cropped.{$ext}", 'temporary://');
+        $cropped->writeImage(drupal_realpath($cropped_file));
+
+        $datastream->mimetype = $cropped->getImageMimeType();
+        $datastream->setContentFromFile($cropped_file);
+        drupal_unlink($cropped_file);
+    }
     $segment->ingestDatastream($datastream);
 
     $ocr = $segment->constructDatastream('OCR', 'M');
@@ -215,9 +231,17 @@ function image_segmentation_ingest_segment(ExtractedSegment &$extractedSegment, 
     $hocr->setContentFromString($extractedSegment->hocr);
     $segment->ingestDatastream($hocr);
 
-    drupal_unlink($cropped_file);
     return $repository->ingestObject($segment);
 }
+
+/**
+ * return newspaper query results
+ * 
+ * @param $page - current manual segmentation page number
+ * @param $solr_query - solr newspaper query
+ *
+ * @return array - solr query results
+ */
 
 function image_segmentation_get_newspaper_pages_from_solr($page, $solr_query) {
 
@@ -232,7 +256,8 @@ function image_segmentation_get_newspaper_pages_from_solr($page, $solr_query) {
 
         $start = $page * 10 - 10;
         $url = "http://localhost:8080/solr/collection1/select?q=" . $solr_query . "&wt=json";
-        $data = file_get_contents($url . "&fq=RELS_EXT_hasModel_uri_s:info\:fedora\/islandora\:newspaperPageCModel" . "&start=" . $start);
+        $data = file_get_contents(
+            $url . "&fq=RELS_EXT_hasModel_uri_s:info\:fedora\/islandora\:newspaperPageCModel" . "&start=" . $start);
 
         if (isset($data)) {
             $results = json_decode($data, TRUE);
@@ -241,4 +266,121 @@ function image_segmentation_get_newspaper_pages_from_solr($page, $solr_query) {
             return array('docs' => $results['response']['docs'], 'num_of_pages' => $num_of_pages);
         }
     }
+}
+
+function image_segmentation_crop_jp2(AbstractDatastream &$source, AbstractDatastream &$dest, BoundingBox $bounding_box) {
+  $client = new Client(
+    ['base_uri' => variable_get('djatoka_base_uri','http://localhost:8080/adore-djatoka/')]
+  );
+  $url = url("islandora/object/{$source->parent->id}/datastream/{$source->id}/view",
+    [
+      'absolute' => TRUE,
+      //      'query' => array(
+      //        'token' => $token,
+      //      ),
+      'language' => language_default(),
+      'https' => FALSE,
+    ]
+  );
+  $meta = json_decode($client->get('resolver', [
+    'query' => [
+      'url_ver' => 'Z39.88-2004',
+      'rft_id' => $url,
+      'svc_id' => 'info:lanl-repo/svc/getMetadata',
+    ],
+  ])->getBody());
+
+  $x = (int) ($bounding_box->upper_left_x * $meta->width);
+  $y = (int) ($bounding_box->upper_left_y * $meta->height);
+  $width = (int) (($bounding_box->lower_right_x - $bounding_box->upper_left_x) * $meta->width);
+  $height = (int) (($bounding_box->lower_right_y - $bounding_box->upper_left_y) * $meta->height);
+
+  $query = [
+    'url_ver' => 'Z39.88-2004',
+    'rft_id' => $url,
+    'svc_id' => 'info:lanl-repo/svc/getRegion',
+    'svc_val_fmt' => 'info:ofi/fmt:kev:mtx:png',
+    'svc.format' => 'image/jp2',
+    'svc.region' => "{$y},{$x},{$height},{$width}",
+  ];
+
+  $response = $client->get('resolver', ['query' => $query]);
+
+  $dest->content = $response->getBody();
+
+}
+
+
+function image_segmentation_scale_jp2(AbstractDatastream &$datastream, int $level){
+  $client = new Client(
+    ['base_uri' => variable_get('djatoka_base_uri','http://localhost:8080/adore-djatoka/')]
+  );
+  $url = url("islandora/object/{$datastream->parent->id}/datastream/{$datastream->id}/view",
+    [
+      'absolute' => TRUE,
+      //      'query' => array(
+      //        'token' => $token,
+      //      ),
+      'language' => language_default(),
+      'https' => FALSE,
+    ]
+  );
+
+  $query = [
+    'url_ver' => 'Z39.88-2004',
+    'rft_id' => $url,
+    'svc_id' => 'info:lanl-repo/svc/getRegion',
+    'svc_val_fmt' => 'info:ofi/fmt:kev:mtx:jpeg2000',
+    'svc.format' => 'image/jpeg',
+      'svc.level' => $level,
+  ];
+
+  $response = $client->get('resolver', ['query' => $query]);
+  return $response->getBody();
+}
+
+/**
+ * Hits a dummy endpoint in the API to see if it is accessible.
+ *
+ * @return boolean
+ *  Whether or not the connection was successful.
+ */
+function check_api_connection() {
+  $api_host = variable_get("image_segmentation_api_host");
+  $api_port = variable_get("image_segmentation_api_port");
+  $api_key = variable_get("image_segmentation_api_key", "");
+  $api_timeout = variable_get("image_segmentation_timeout", 5);
+  try {
+    $client = new SegmentationClient("{$api_host}:{$api_port}/test/", $api_timeout, $api_key);
+    $response = $client->segmentBase64("abc");
+    assert($response->status_code == 0);
+    drupal_set_message("Successfully connected to API.");
+    return True;
+  } catch (Exception $e) {
+    drupal_set_message("Error connecting to API: " . $e, "error");
+    return False;
+  }
+}
+
+function get_pages_from_issue($issue_pid){
+    $split_issue_pid = explode(":", $issue_pid);
+    $formatted_issue_pid = $split_issue_pid[0] . "\:" .
+        $split_issue_pid[1];
+    
+    //Get associated pages from solr
+    $url = "http://localhost:8080/solr/collection1/select?q=*:*&wt=json";
+    $data = file_get_contents($url
+        . "&fq=RELS_EXT_hasModel_uri_s:info\:fedora\/islandora\:newspaperPageCModel"
+        . "&fq=RELS_EXT_isPageOf_uri_s:info\:fedora\/".$formatted_issue_pid
+        . "&start=0&rows=100");
+
+    if(isset($data)){
+        $results = json_decode($data, TRUE);
+
+        if(!empty($results)){
+            return $results;
+        }
+    }
+    
+    return NULL;
 }

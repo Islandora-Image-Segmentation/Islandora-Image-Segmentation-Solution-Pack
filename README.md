@@ -26,9 +26,15 @@ A configuration page can be found at Administration » Islandora » Solution Pac
 The configuration page allows you to set the following parameters:
 
 1. API Host: The hostname where your API is running. For example, `localhost` or `37.53.12.12`.
-2. API Port: The port that your API is running on. For example, `8000`.
+2. API Port: The port that your API is running on. For example, `8008`.
 3. API Key: The API key that your API is using. Can be left blank if the API was not launched with a key.
 4. Confidence Threshold: A number between 0 and 1. All returned segments below this threshold will not be ingested.
+
+If installing via vagrant, batch_process and composer_manager should be enabled automatically otherwise, you can enable both using the UI or:
+
+1. Navigate to your drupal root folder in terminal (normally '/var/www/drupal')
+2. Run `drush en -u 1 -y composer_manager`
+3. Run `drush en -u 1 -y background_batch`
 
 ## Per-page Segmentation
 You can manually segment individual pages.
@@ -57,3 +63,8 @@ To try the solution pack out, you can use a Vagrant virtual machine which has an
 1. If you would like to use xdebug is the port 9003 and the idekey "debugit"
 5. All done! You now have an Islandora instance running with this solution pack installed.
 
+## Cancelling a batch process
+
+1. Navigate to your drupal root folder in terminal (normally '/var/www/drupal')
+1. Get the id of your batch job found at {site-url}/config/system/batch/overview (ex. http://localhost:8000/admin/config/system/batch/overview)
+1. Replace {batch id} with the id obtained in step 2 and run `drush -y -u 1 sql-query "DELETE FROM batch WHERE bid IN ({batch id});"`

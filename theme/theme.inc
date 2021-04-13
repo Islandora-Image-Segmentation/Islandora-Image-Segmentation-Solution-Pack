@@ -60,27 +60,8 @@ function template_preprocess_image_segmentation_segment(array &$variables) {
     }
 }
 
-
-/**
- * Prepares variables for image_segmentation_segment templates
- *
- * @param array $variables
- *   An associative array containing:
- *   - object: An AbstractObject for which to generate the display.
- */
-function template_preprocess_image_segmentation_segment_list(array &$variables) {
+function template_preprocess_image_segmentation_manual_segmentation_results(array &$variables) {
+    drupal_add_js(drupal_get_path('module', 'image_segmentation') . 'js/manual_segmentation_results.js');
+    drupal_add_css(drupal_get_path('module', 'image_segmentation') . '/css/image_segmentation_segment_list.css');
     module_load_include('inc', 'image_segmentation', 'includes/utilities');
-    $object = $variables['object'];
-    $segments = image_segmentation_get_segments($object);
-    $variables['segments'] = [];
-    foreach ($segments as $segment) {
-        $variables['segments'][] = [
-            'object' => $segment,
-            'type' => image_segmentation_get_type($segment),
-            'link' => url("islandora/object/{$segment->id}/"),
-            'tn_url' => url("islandora/object/{$segment->id}/datastream/TN/view"),
-        ];
-    }
-    $variables['content_types'] = image_segmentation_get_content_types();
-
 }
