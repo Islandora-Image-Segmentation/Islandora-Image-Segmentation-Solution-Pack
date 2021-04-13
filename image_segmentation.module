@@ -223,6 +223,24 @@ function image_segmentation_islandora_paged_content_page_management_tabs_alter(&
     ];
 }
 
+
+
+/**
+ * Implements hook_islandora_paged_content_pages_management_tabs_alter().
+ */
+function image_segmentation_islandora_paged_content_pages_management_tabs_alter(&$manage_tabs, $context) {
+  module_load_include('inc', 'image_segmentation', 'includes/generate_segment.form');
+  $manage_tabs['manage_pages']['segments'] = [
+    '#title' => t('Generate Segments'),
+    '#type' => 'fieldset',
+    'form' => drupal_get_form('image_segmentation_generate_segment_issues_form', $context['object']),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+  ];
+}
+
+
+
 /**
  * Begins page segmentation after ingestion
  *

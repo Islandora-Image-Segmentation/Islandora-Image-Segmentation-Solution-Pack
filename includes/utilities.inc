@@ -99,6 +99,7 @@ function image_segmentation_get_content_types() {
 function image_segmentation_can_segment(AbstractObject $object) {
   $to_derive = [
     'islandora:newspaperPageCModel',
+    'islandora:newspaperIssueCModel'
   ];
   return array_intersect($to_derive, $object->models) && isset($object['OBJ']);
 }
@@ -376,7 +377,6 @@ function get_pages_from_issue($issue_pid){
 
     if(isset($data)){
         $results = json_decode($data, TRUE);
-
         if(!empty($results)){
             return $results;
         }
