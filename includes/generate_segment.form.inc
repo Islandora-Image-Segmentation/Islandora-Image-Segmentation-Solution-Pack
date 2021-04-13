@@ -74,7 +74,7 @@ function image_segmentation_generate_segment_issues_form(array $form, array &$fo
   return [
     'description' => [
       '#type' => 'item',
-      '#description' => t('You must have the <b>Image Segmentation API</b> confugured to extract image segments.'),
+      '#description' => t('You must have the <b>Image Segmentation API</b> configured to extract image segments.'),
     ],
     'force' => [
       '#type' => 'checkbox',
@@ -102,30 +102,18 @@ function image_segmentation_generate_segment_issues_form(array $form, array &$fo
  */
 function image_segmentation_generate_segment_issues_form_submit(array $form, array &$form_state) {
   module_load_include('inc', 'image_segmentation', 'includes/utilities');
-  drupal_set_message("Creating background tasks for pages ...");
+  drupal_set_message("Segmenting pages of issue ...");
   $pages = get_pages_from_issue($form_state['values']['pid']);
 
-  forEach($pages['response']['docs'] as $page){
-    $total_for_segmentation = 1;
-    $operations = array();
-
+  forEach($pages['response']['docs'] as $page)
+  {
+    drupal_set_message("Starting next page...");
     $object = islandora_object_load($page['PID']);
-
-    $operations[] = array(
-      'image_segmentation_batch_extract_segments_from_page',
-      array($object, $total_for_segmentation)
-    );
-
-    $batch = array(
-      'operations' => $operations,
-      'init_message' => t('Segmentation is starting'),
-      'error_message' => t('Batch segmentation encountered an error'),
-      'progress_message' => t('Batch segmentation process complete'),
-      'finished' => 'image_segmentation_batch_extract_segments_from_page_completed',
-    );
-
-    batch_set($batch);
-
-    background_batch_process_batch("");
+    if (image_segmentation_extract_segments($object, TRUE)) {
+      drupal_set_message(t('Successfully extracted segments.'));
+    }
+    else {
+      drupal_set_message(t('Failed to extracted segments.'), 'error');
+    }
   }
 }
