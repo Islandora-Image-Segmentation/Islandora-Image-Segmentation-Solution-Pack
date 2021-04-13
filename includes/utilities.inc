@@ -132,10 +132,10 @@ function image_segmentation_extract_segments(AbstractObject $object, bool $force
     return FALSE;
   }
 
-  $api_host = variable_get("image_segmentation_api_host", "localhost");
-  $api_port = variable_get("image_segmentation_api_port", 8008);
-  $api_key = variable_get("image_segmentation_api_key", "");
-  $api_timeout = variable_get("image_segmentation_timeout", 60.0);
+  $api_host = variable_get("image_segmentation_api_host");
+  $api_port = variable_get("image_segmentation_api_port");
+  $api_key = variable_get("image_segmentation_api_key");
+  $api_timeout = variable_get("image_segmentation_timeout");
   $client = new SegmentationClient("{$api_host}:{$api_port}/api/", $api_timeout, $api_key);
 
   $filename = image_segmentation_get_uploaded_file($object['OBJ']);
@@ -365,8 +365,8 @@ function image_segmentation_scale_jp2(AbstractDatastream &$datastream, int $leve
 function check_api_connection() {
   $api_host = variable_get("image_segmentation_api_host");
   $api_port = variable_get("image_segmentation_api_port");
-  $api_key = variable_get("image_segmentation_api_key", "");
-  $api_timeout = variable_get("image_segmentation_timeout", 5);
+  $api_key = variable_get("image_segmentation_api_key");
+  $api_timeout = variable_get("image_segmentation_timeout");
   try {
     $client = new SegmentationClient("{$api_host}:{$api_port}/test/", $api_timeout, $api_key);
     $response = $client->segmentBase64("abc");
