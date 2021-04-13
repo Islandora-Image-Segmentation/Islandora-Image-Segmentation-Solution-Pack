@@ -51,7 +51,9 @@ function image_segmentation_add_generate_extracted_segments_issue_handler($form,
  * Handles newspaper page ingest form segmentation.
  *
  * @param $form
+ *  The form being handled.
  * @param $form_state
+ *  The state of the form being handled.
  */
 
 function image_segmentation_add_generate_extracted_segments_page_handler($form, &$form_state) {
