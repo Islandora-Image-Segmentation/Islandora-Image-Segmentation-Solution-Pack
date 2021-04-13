@@ -14,13 +14,20 @@ use GuzzleHttp\Client;
  * @return array
  *   All the segments in the given newspaper page.
  */
-function image_segmentation_get_segments(AbstractObject $object) {
+function image_segmentation_get_segments(AbstractObject $object, $type = NULL) {
 
   $repository = $object->repository;
   $get_object = function ($id) use (&$repository) {
     return $repository->getObject($id);
   };
-  return array_map($get_object, image_segmentation_get_segment_pids($object));
+  $segments = array_map($get_object, image_segmentation_get_segment_pids($object));
+  if (isset($type) && $type != 'all') {
+    $filter_type = function ($segment) use ($type) {
+      return $type == image_segmentation_get_type($segment);
+    };
+    $segments = array_filter($segments, $filter_type);
+  }
+  return $segments;
 }
 
 /**
@@ -70,13 +77,13 @@ function image_segmentation_get_type(AbstractObject $object) {
 
 function image_segmentation_get_content_types() {
   return [
-    'illustration',
-    'photograph',
-    'comics/cartoon',
-    'editorial_cartoon',
-    'map',
-    'headline',
-    'ad',
+    "Photograph",
+    "Illustration",
+    "Map",
+    "Comics/Cartoons",
+    "Editorial Cartoon",
+    "Headline",
+    "Advertisement",
   ];
 }
 
@@ -227,6 +234,15 @@ function image_segmentation_ingest_segment(ExtractedSegment &$extractedSegment, 
     return $repository->ingestObject($segment);
 }
 
+/**
+ * return newspaper query results
+ * 
+ * @param $page - current manual segmentation page number
+ * @param $solr_query - solr newspaper query
+ *
+ * @return array - solr query results
+ */
+
 function image_segmentation_get_newspaper_pages_from_solr($page, $solr_query) {
 
     $num_of_pages = 0;
@@ -240,7 +256,8 @@ function image_segmentation_get_newspaper_pages_from_solr($page, $solr_query) {
 
         $start = $page * 10 - 10;
         $url = "http://localhost:8080/solr/collection1/select?q=" . $solr_query . "&wt=json";
-        $data = file_get_contents($url . "&fq=RELS_EXT_hasModel_uri_s:info\:fedora\/islandora\:newspaperPageCModel" . "&start=" . $start);
+        $data = file_get_contents(
+            $url . "&fq=RELS_EXT_hasModel_uri_s:info\:fedora\/islandora\:newspaperPageCModel" . "&start=" . $start);
 
         if (isset($data)) {
             $results = json_decode($data, TRUE);
@@ -343,4 +360,27 @@ function check_api_connection() {
     drupal_set_message("Error connecting to API: " . $e, "error");
     return False;
   }
+}
+
+function get_pages_from_issue($issue_pid){
+    $split_issue_pid = explode(":", $issue_pid);
+    $formatted_issue_pid = $split_issue_pid[0] . "\:" .
+        $split_issue_pid[1];
+    
+    //Get associated pages from solr
+    $url = "http://localhost:8080/solr/collection1/select?q=*:*&wt=json";
+    $data = file_get_contents($url
+        . "&fq=RELS_EXT_hasModel_uri_s:info\:fedora\/islandora\:newspaperPageCModel"
+        . "&fq=RELS_EXT_isPageOf_uri_s:info\:fedora\/".$formatted_issue_pid
+        . "&start=0&rows=100");
+
+    if(isset($data)){
+        $results = json_decode($data, TRUE);
+
+        if(!empty($results)){
+            return $results;
+        }
+    }
+    
+    return NULL;
 }
