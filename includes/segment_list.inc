@@ -64,6 +64,13 @@ function segment_list_array(AbstractObject $object) {
   ];
 }
 
+/**
+ * @param $segments
+ *  Array of generated segments
+ *
+ * @return array
+ */
+
 function image_segmentation_segment_previews($segments) {
   $previews = [];
   foreach ($segments as $segment) {
@@ -71,6 +78,13 @@ function image_segmentation_segment_previews($segments) {
   }
   return $previews;
 }
+
+/**
+ * @param \AbstractObject $segment
+ *  Current segment being previewed
+ *
+ * @return array
+ */
 
 function image_segmentation_segment_preview(AbstractObject $segment) {
 
@@ -101,6 +115,17 @@ function image_segmentation_segment_preview(AbstractObject $segment) {
     ],
   ];
 }
+
+/**
+ * @param $form
+ *  The sidebar filter form
+ * @param $form_state
+ *  The sidebar filter form state
+ * @param $page
+ *  Page from which segments are generated
+ *
+ * @return array[]
+ */
 
 function image_segmentation_segment_filter_form($form, $form_state, $page) {
   module_load_include('inc', 'image_segmentation', 'includes/utilities');
