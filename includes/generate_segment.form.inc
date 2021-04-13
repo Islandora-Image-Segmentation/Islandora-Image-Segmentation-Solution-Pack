@@ -109,7 +109,7 @@ function image_segmentation_generate_segment_issues_form_submit(array $form, arr
   {
     drupal_set_message("Starting next page...");
     $object = islandora_object_load($page['PID']);
-    if (image_segmentation_extract_segments($object, TRUE)) {
+    if (image_segmentation_extract_segments($object, $form_state['values']['force'])) {
       drupal_set_message(t('Successfully extracted segments.'));
     }
     else {
