@@ -82,7 +82,7 @@ EOF
     :privileged => false
 
   config.vm.provision "shell", inline: <<-SHELL
-    drush --root=/var/ww/drupal/ en -u 1 -y simpletest
+    drush --root=/var/www/drupal/ en -u 1 -y simpletest
     chown -R www-data:www-data /var/www/drupal/sites/default/
     chmod 666 /usr/local/fedora/server/config/filter-drupal.xml
     rm -rf /var/www/drupal/sites/all/modules/islandora_scholar/
