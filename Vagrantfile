@@ -67,25 +67,25 @@ EOF
   config.vm.provision "shell", inline: <<-SHELL
     drush --root=/var/www/drupal/ en -u 1 -y composer_manager || echo '##### PLEASE IGNORE THE ERRORS #####'
     drush --root=/var/www/drupal/ en -u 1 -y image_segmentation
-    drush --root=/var/www/drupal/ en -u 1 -y background_batch", :privileged => false
+    drush --root=/var/www/drupal/ en -u 1 -y background_batch
     drush --root=/var/www/drupal/ dl drush_extras
     drush --root=/var/www/drupal/ block-configure  --module image_segmentation --delta image_segment_list --region sidebar_first
   SHELL
 
   config.vm.provision :shell,
-    inline: "drush --root=/var/www/drupal/ vset api_host $1",
+    inline: "drush --root=/var/www/drupal/ vset image_segmentation_api_host $1",
     :args => $newspaper_navigator_host,
     :privileged => false
   config.vm.provision :shell,
-    inline: "drush --root=/var/www/drupal/ vset api_port $1",
+    inline: "drush --root=/var/www/drupal/ vset image_segmentation_api_port $1",
     :args => $newspaper_navigator_port,
     :privileged => false
 
   config.vm.provision "shell", inline: <<-SHELL
-    drush --root=/var/www/drupal/ en -u 1 -y simpletest", :privileged => false
-    chown -R www-data:www-data /var/www/drupal/sites/default/", :privileged => true
-    chmod 666 /usr/local/fedora/server/config/filter-drupal.xml", :privileged => true
-    rm -rf /var/www/drupal/sites/all/modules/islandora_scholar/", :privileged => false
+    drush --root=/var/www/drupal/ en -u 1 -y simpletest
+    chown -R www-data:www-data /var/www/drupal/sites/default/
+    chmod 666 /usr/local/fedora/server/config/filter-drupal.xml
+    rm -rf /var/www/drupal/sites/all/modules/islandora_scholar/
   SHELL
 
   config.vm.provision :shell, inline: "drush --root=/var/www/drupal/ cache-clear all", :privileged => false
