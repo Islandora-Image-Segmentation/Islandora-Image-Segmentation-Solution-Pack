@@ -48,6 +48,13 @@ function image_segmentation_menu() {
 
 /**
  * Implements hook_theme().
+ *
+ * @param $existing
+ * @param $type
+ * @param $theme
+ * @param $path
+ *
+ * @return array[]
  */
 function image_segmentation_theme($existing, $type, $theme, $path) {
     return [
@@ -223,6 +230,24 @@ function image_segmentation_islandora_paged_content_page_management_tabs_alter(&
     ];
 }
 
+
+
+/**
+ * Implements hook_islandora_paged_content_pages_management_tabs_alter().
+ */
+function image_segmentation_islandora_paged_content_pages_management_tabs_alter(&$manage_tabs, $context) {
+  module_load_include('inc', 'image_segmentation', 'includes/generate_segment.form');
+  $manage_tabs['manage_pages']['segments'] = [
+    '#title' => t('Generate Segments'),
+    '#type' => 'fieldset',
+    'form' => drupal_get_form('image_segmentation_generate_segment_issues_form', $context['object']),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+  ];
+}
+
+
+
 /**
  * Begins page segmentation after ingestion
  *
@@ -264,8 +289,11 @@ function image_segmentation_islandora_newspaperPageCModel_islandora_object_inges
  * Implements drupal batch api to extract segments from pages
  *
  * @param $page
+ *  Page to extracts segments from
  * @param $total_pages
+ *  Number of pages in queue
  * @param $context
+ *  Context of current batch process
  */
 
 function image_segmentation_batch_extract_segments_from_page($page, $total_pages, &$context) {

@@ -14,7 +14,9 @@
  * Adds a solr query form to the manual segmentation page
  *
  * @param array $form
+ *  The form being created
  * @param $form_state
+ *  Current state of the created form
  *
  * @return array
  */
