@@ -1,12 +1,34 @@
 <?php
 
+/**
+ * @param \AbstractObject $object
+ * @param bool $force
+ *
+ * @return array
+ */
+
 function image_segmentation_create_tn_jp2_derivative(AbstractObject $object, $force = TRUE) {
   return image_segmentation_create_scaled_jp2_derivative($object, 'TN', 2, 'image/jpeg', $force);
 }
 
+/**
+ * @param \AbstractObject $object
+ * @param bool $force
+ *
+ * @return array
+ */
+
 function image_segmentation_create_jpg_jp2_derivative(AbstractObject $object, $force = TRUE) {
   return image_segmentation_create_scaled_jp2_derivative($object, 'JPG', 100, 'image/jpeg', $force);
 }
+
+/**
+ * @param \AbstractObject $object
+ *  Page object
+ * @param bool $force
+ *
+ * @return array
+ */
 
 function image_segmentation_create_jp2_jp2_derivative(AbstractObject $object, $force = TRUE) {
   try {
@@ -35,6 +57,17 @@ function image_segmentation_create_jp2_jp2_derivative(AbstractObject $object, $f
   }
 
 }
+
+/**
+ * @param \AbstractObject $object
+ *  Page object
+ * @param $dsid
+ * @param $level
+ * @param string $ds_mimetype
+ * @param bool $force
+ *
+ * @return array
+ */
 
 function image_segmentation_create_scaled_jp2_derivative(AbstractObject $object, $dsid, $level, $ds_mimetype = 'image/jpeg', $force = TRUE) {
   try {

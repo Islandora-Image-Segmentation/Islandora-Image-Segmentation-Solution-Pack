@@ -14,13 +14,20 @@ use GuzzleHttp\Client;
  * @return array
  *   All the segments in the given newspaper page.
  */
-function image_segmentation_get_segments(AbstractObject $object) {
+function image_segmentation_get_segments(AbstractObject $object, $type = NULL) {
 
   $repository = $object->repository;
   $get_object = function ($id) use (&$repository) {
     return $repository->getObject($id);
   };
-  return array_map($get_object, image_segmentation_get_segment_pids($object));
+  $segments = array_map($get_object, image_segmentation_get_segment_pids($object));
+  if (isset($type) && $type != 'all') {
+    $filter_type = function ($segment) use ($type) {
+      return $type == image_segmentation_get_type($segment);
+    };
+    $segments = array_filter($segments, $filter_type);
+  }
+  return $segments;
 }
 
 /**
@@ -68,15 +75,20 @@ function image_segmentation_get_type(AbstractObject $object) {
 
 }
 
+/**
+ * @return string[]
+ *  String array of segment classes
+ */
+
 function image_segmentation_get_content_types() {
   return [
-    'illustration',
-    'photograph',
-    'comics/cartoon',
-    'editorial_cartoon',
-    'map',
-    'headline',
-    'ad',
+    "Photograph",
+    "Illustration",
+    "Map",
+    "Comics/Cartoons",
+    "Editorial_Cartoon",
+    "Headline",
+    "Advertisement",
   ];
 }
 
@@ -92,6 +104,7 @@ function image_segmentation_get_content_types() {
 function image_segmentation_can_segment(AbstractObject $object) {
   $to_derive = [
     'islandora:newspaperPageCModel',
+    'islandora:newspaperIssueCModel'
   ];
   return array_intersect($to_derive, $object->models) && isset($object['OBJ']);
 }
@@ -119,10 +132,10 @@ function image_segmentation_extract_segments(AbstractObject $object, bool $force
     return FALSE;
   }
 
-  $api_host = variable_get("image_segmentation_api_host", "localhost");
-  $api_port = variable_get("image_segmentation_api_port", 8008);
-  $api_key = variable_get("image_segmentation_api_key", "");
-  $api_timeout = variable_get("image_segmentation_timeout", 60.0);
+  $api_host = variable_get("image_segmentation_api_host");
+  $api_port = variable_get("image_segmentation_api_port");
+  $api_key = variable_get("image_segmentation_api_key");
+  $api_timeout = variable_get("image_segmentation_timeout");
   $client = new SegmentationClient("{$api_host}:{$api_port}/api/", $api_timeout, $api_key);
 
   $filename = image_segmentation_get_uploaded_file($object['OBJ']);
@@ -189,7 +202,8 @@ function image_segmentation_ingest_segment(ExtractedSegment &$extractedSegment, 
     $segment->label = $id;
     $segment->relationships->add(FEDORA_RELS_EXT_URI, 'isMemberOfCollection', $parent->id);
     $segment->relationships->add(ISLANDORA_RELS_EXT_URI, 'isSegmentOf', $parent->id);
-    $segment->relationships->add(ISLANDORA_RELS_INT_URI, 'hasImageCategory', $extractedSegment->classification);
+    $image_category = str_replace(' ', '_',$extractedSegment->classification);
+    $segment->relationships->add(ISLANDORA_RELS_INT_URI, 'hasImageCategory', $image_category);
     $segment->models = ['islandora:segmentedImageCModel'];
 
     $datastream = $segment->constructDatastream('OBJ', 'M');
@@ -249,7 +263,8 @@ function image_segmentation_get_newspaper_pages_from_solr($page, $solr_query) {
 
         $start = $page * 10 - 10;
         $url = "http://localhost:8080/solr/collection1/select?q=" . $solr_query . "&wt=json";
-        $data = file_get_contents($url . "&fq=RELS_EXT_hasModel_uri_s:info\:fedora\/islandora\:newspaperPageCModel" . "&start=" . $start);
+        $data = file_get_contents(
+            $url . "&fq=RELS_EXT_hasModel_uri_s:info\:fedora\/islandora\:newspaperPageCModel" . "&start=" . $start);
 
         if (isset($data)) {
             $results = json_decode($data, TRUE);
@@ -259,6 +274,17 @@ function image_segmentation_get_newspaper_pages_from_solr($page, $solr_query) {
         }
     }
 }
+
+/**
+ * @param \AbstractDatastream $source
+ *  Source datastream
+ * @param \AbstractDatastream $dest
+ *  Desination datastream
+ * @param \NewspaperNavigator\BoundingBox $bounding_box
+ *  Crop dimensions
+ *
+ * @throws \GuzzleHttp\Exception\GuzzleException
+ */
 
 function image_segmentation_crop_jp2(AbstractDatastream &$source, AbstractDatastream &$dest, BoundingBox $bounding_box) {
   $client = new Client(
@@ -340,8 +366,8 @@ function image_segmentation_scale_jp2(AbstractDatastream &$datastream, int $leve
 function check_api_connection() {
   $api_host = variable_get("image_segmentation_api_host");
   $api_port = variable_get("image_segmentation_api_port");
-  $api_key = variable_get("image_segmentation_api_key", "");
-  $api_timeout = variable_get("image_segmentation_timeout", 5);
+  $api_key = variable_get("image_segmentation_api_key");
+  $api_timeout = variable_get("image_segmentation_timeout");
   try {
     $client = new SegmentationClient("{$api_host}:{$api_port}/test/", $api_timeout, $api_key);
     $response = $client->segmentBase64("abc");
@@ -352,4 +378,34 @@ function check_api_connection() {
     drupal_set_message("Error connecting to API: " . $e, "error");
     return False;
   }
+}
+
+/**
+ * @param $issue_pid
+ *  PID of issue from which to extract pages
+ *
+ * @return mixed|null
+ *  List of page objects or null if no results
+ */
+
+function get_pages_from_issue($issue_pid){
+    $split_issue_pid = explode(":", $issue_pid);
+    $formatted_issue_pid = $split_issue_pid[0] . "\:" .
+        $split_issue_pid[1];
+    
+    //Get associated pages from solr
+    $url = "http://localhost:8080/solr/collection1/select?q=*:*&wt=json";
+    $data = file_get_contents($url
+        . "&fq=RELS_EXT_hasModel_uri_s:info\:fedora\/islandora\:newspaperPageCModel"
+        . "&fq=RELS_EXT_isPageOf_uri_s:info\:fedora\/".$formatted_issue_pid
+        . "&start=0&rows=100");
+
+    if(isset($data)){
+        $results = json_decode($data, TRUE);
+        if(!empty($results)){
+            return $results;
+        }
+    }
+    
+    return NULL;
 }

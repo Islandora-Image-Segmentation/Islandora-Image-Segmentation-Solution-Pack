@@ -15,6 +15,11 @@ function image_segmentation_install()
 {
     module_load_include('inc', 'islandora', 'includes/solution_packs');
     islandora_install_solution_pack('image_segmentation');
+    variable_set('image_segmentation_api_host', 'localhost');
+    variable_set('image_segmentation_api_port', '8008');
+    variable_set('image_segmentation_api_key', "");
+    variable_set('image_segmentation_confidence_threshold', 0.6);
+    variable_set('image_segmentation_timeout', 0);
 }
 
 /**
@@ -24,4 +29,10 @@ function image_segmentation_uninstall()
 {
     module_load_include('inc', 'islandora', 'includes/solution_packs');
     islandora_install_solution_pack('image_segmentation', 'uninstall');
+    islandora_install_solution_pack('image_segmentation');
+    variable_del('image_segmentation_api_host');
+    variable_del('image_segmentation_api_port');
+    variable_del('image_segmentation_api_key');
+    variable_del('image_segmentation_confidence_threshold');
+    variable_del('image_segmentation_timeout');
 }

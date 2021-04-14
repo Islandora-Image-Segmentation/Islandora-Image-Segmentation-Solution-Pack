@@ -5,6 +5,7 @@ const COOKIE_EXPIRY_IN_MINUTES = 10;
 
     if (localStorage.getItem("manual_seg_checkbox_states") !== null) {
       const checkbox_states = JSON.parse(localStorage.getItem("manual_seg_checkbox_states"));
+      console.log(checkbox_states);
       const checkboxes = document.getElementsByClassName("manual_segmentation_checkboxes");
 
       for (let i = 0; i < checkboxes.length; i++) {
@@ -33,6 +34,10 @@ function updated_checkboxes() {
   const checkboxes = document.getElementsByClassName("manual_segmentation_checkboxes");
   let updated_checkboxes = [];
   let updated_checkboxes_map = {};
+  
+  if(localStorage.getItem("manual_seg_checkbox_states")){
+    updated_checkboxes_map = JSON.parse(localStorage.getItem("manual_seg_checkbox_states"));
+  }
 
   for (let i = 0; i < checkboxes.length; i++) {
     updated_checkboxes.push({
@@ -42,6 +47,8 @@ function updated_checkboxes() {
 
     updated_checkboxes_map[checkboxes[i].value] = checkboxes[i].checked;
   }
+
+  localStorage.setItem("manual_seg_checkbox_states", JSON.stringify(updated_checkboxes_map));
 
   const current_date = new Date();
   current_date.setMinutes(current_date.getMinutes() + COOKIE_EXPIRY_IN_MINUTES);

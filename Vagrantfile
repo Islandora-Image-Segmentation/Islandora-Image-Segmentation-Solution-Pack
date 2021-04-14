@@ -50,17 +50,44 @@ Vagrant.configure("2") do |config|
 
    end
 
-  config.vm.provision :shell, inline: "drush --root=/var/www/drupal/ en -u 1 -y composer_manager || echo '##### PLEASE IGNORE THE ERRORS #####' ", :privileged => false
-  config.vm.provision :shell, inline: "drush --root=/var/www/drupal/ en -u 1 -y image_segmentation", :privileged => false
-  config.vm.provision :shell, inline: "drush --root=/var/www/drupal/ vset image_segmentation_api_host $1", :args => $newspaper_navigator_host, :privileged => false
-  config.vm.provision :shell, inline: "drush --root=/var/www/drupal/ vset image_segmentation_api_port $1", :args => $newspaper_navigator_port, :privileged => false
-  config.vm.provision :shell, inline: "drush --root=/var/www/drupal/ en -u 1 -y simpletest", :privileged => false
-  config.vm.provision :shell, inline: "chown -R www-data:www-data /var/www/drupal/sites/default/", :privileged => true
-  config.vm.provision :shell, inline: "chmod 666 /usr/local/fedora/server/config/filter-drupal.xml", :privileged => true
-  config.vm.provision :shell, inline: "rm -rf /var/www/drupal/sites/all/modules/islandora_scholar/", :privileged => false
-  config.vm.provision :shell, inline: "drush --root=/var/www/drupal/ en -u 1 -y background_batch", :privileged => false
-  config.vm.provision :shell, inline: "drush --root=/var/www/drupal/ dl drush_extras", :privileged => false
-  config.vm.provision :shell, inline: "drush --root=/var/www/drupal/ block-configure  --module image_segmentation --delta image_segment_list --region sidebar_first", :privileged => false
+  config.vm.provision "shell", inline: <<-SHELL
+    sudo apt-get update
+    sudo apt-get install -y php7.4-xdebug
+    cat << 'EOF' >> xdebug.ini
+[xdebug]
+zend_extension=xdebug.so
+xdebug.mode=debug
+xdebug.client_host=10.0.2.2
+xdebug.client_port=9003
+EOF
+    sudo mv xdebug.ini /etc/php/7.4/mods-available/
+    sudo systemctl  restart apache2
+  SHELL
+
+  config.vm.provision "shell", inline: <<-SHELL
+    drush --root=/var/www/drupal/ en -u 1 -y composer_manager || echo '##### PLEASE IGNORE THE ERRORS #####'
+    drush --root=/var/www/drupal/ en -u 1 -y image_segmentation
+    drush --root=/var/www/drupal/ en -u 1 -y background_batch
+    drush --root=/var/www/drupal/ dl drush_extras
+    drush --root=/var/www/drupal/ block-configure  --module image_segmentation --delta image_segment_list --region sidebar_first
+  SHELL
+
+  config.vm.provision :shell,
+    inline: "drush --root=/var/www/drupal/ vset image_segmentation_api_host $1",
+    :args => $newspaper_navigator_host,
+    :privileged => false
+  config.vm.provision :shell,
+    inline: "drush --root=/var/www/drupal/ vset image_segmentation_api_port $1",
+    :args => $newspaper_navigator_port,
+    :privileged => false
+
+  config.vm.provision "shell", inline: <<-SHELL
+    drush --root=/var/www/drupal/ en -u 1 -y simpletest
+    chown -R www-data:www-data /var/www/drupal/sites/default/
+    chmod 666 /usr/local/fedora/server/config/filter-drupal.xml
+    rm -rf /var/www/drupal/sites/all/modules/islandora_scholar/
+  SHELL
+
   config.vm.provision :shell, inline: "drush --root=/var/www/drupal/ cache-clear all", :privileged => false
 
   unless  $multiple_vms.eql? "FALSE"
