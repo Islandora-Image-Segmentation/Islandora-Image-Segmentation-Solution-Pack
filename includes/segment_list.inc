@@ -134,7 +134,8 @@ function image_segmentation_segment_filter_form($form, $form_state, $page) {
   $type_options['all'] = 'All';
   foreach ($types as $type) {
     $num = count(image_segmentation_get_segments($page, $type));
-    $type_options[$type] = "$type ($num)";
+    $type_space = str_replace('_',' ', $type);
+    $type_options[$type] = "$type_space ($num)";
   }
   return [
     'type_filter' => [

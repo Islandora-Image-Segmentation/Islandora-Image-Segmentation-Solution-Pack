@@ -86,7 +86,7 @@ function image_segmentation_get_content_types() {
     "Illustration",
     "Map",
     "Comics/Cartoons",
-    "Editorial Cartoon",
+    "Editorial_Cartoon",
     "Headline",
     "Advertisement",
   ];
@@ -202,7 +202,8 @@ function image_segmentation_ingest_segment(ExtractedSegment &$extractedSegment, 
     $segment->label = $id;
     $segment->relationships->add(FEDORA_RELS_EXT_URI, 'isMemberOfCollection', $parent->id);
     $segment->relationships->add(ISLANDORA_RELS_EXT_URI, 'isSegmentOf', $parent->id);
-    $segment->relationships->add(ISLANDORA_RELS_INT_URI, 'hasImageCategory', $extractedSegment->classification);
+    $image_category = str_replace(' ', '_',$extractedSegment->classification);
+    $segment->relationships->add(ISLANDORA_RELS_INT_URI, 'hasImageCategory', $image_category);
     $segment->models = ['islandora:segmentedImageCModel'];
 
     $datastream = $segment->constructDatastream('OBJ', 'M');
